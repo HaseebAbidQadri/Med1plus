@@ -1,0 +1,6 @@
+{
+  "name": "MedOne+",
+  "description": "Premium healthcare platform for MedOne+ Pharmacy. Explore medical categories under one roof, consult professional pharmacists, and access genuine healthcare services with ease.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

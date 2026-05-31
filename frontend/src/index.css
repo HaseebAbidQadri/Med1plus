@@ -1,0 +1,74 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+@theme {
+  --font-sans: "Poppins", system-ui, -apple-system, sans-serif;
+  --font-display: "Manrope", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-brand-blue: #0d5cb5;
+  --color-brand-green: #10b981;
+  --color-brand-green-hover: #059669;
+  --color-brand-dark: #0f172a;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f8fafc;
+  color: #0f172a;
+  overflow-x: hidden;
+}
+
+/* Base custom interactive effects */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Beautiful Bento Grid Custom Utilities */
+.bento-card-white {
+  background-color: #ffffff;
+  border-radius: 32px;
+  padding: 1.5rem;
+  border-width: 1px;
+  border-color: #f1f5f9;
+  box-shadow: 0 20px 25px -5px rgb(226 232 240 / 0.5), 0 8px 10px -6px rgb(226 232 240 / 0.5);
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+.bento-card-green {
+  background-color: #10b981;
+  border-radius: 32px;
+  padding: 1.5rem;
+  color: #ffffff;
+  box-shadow: 0 20px 25px -5px rgb(16 185 129 / 0.25), 0 8px 10px -6px rgb(16 185 129 / 0.25);
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+.bento-card-dark {
+  background-color: #0f172a;
+  border-radius: 32px;
+  padding: 1.5rem;
+  color: #ffffff;
+  box-shadow: 0 20px 25px -5px rgb(15 23 42 / 0.15), 0 8px 10px -6px rgb(15 23 42 / 0.15);
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}

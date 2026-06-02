@@ -17,14 +17,11 @@ if (result.error) {
 export interface Medicine {
   id: string;
   name: string;
-  generic: string;
   price: number;
-  purchasePrice: number;
   imgGradient?: string;
   imgUrl?: string; // For added / custom images
   category: string;
   stock: number;
-  expiryDate: string;
   status: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Expired Soon';
 }
 
@@ -70,14 +67,11 @@ export async function initializeDB() {
       CREATE TABLE IF NOT EXISTS medicines (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
-        generic TEXT NOT NULL,
         price REAL NOT NULL,
-        purchasePrice REAL NOT NULL,
         imgGradient TEXT,
         imgUrl TEXT,
         category TEXT NOT NULL,
         stock INTEGER NOT NULL,
-        expiryDate TEXT NOT NULL,
         status TEXT NOT NULL
       )
     `);
@@ -101,19 +95,19 @@ export async function initializeDB() {
     if (medsCount === 0) {
       console.log('[Turso DB] Table medicines is empty. Initializing with default PMDC-certified retail products...');
       const defaultMeds: Medicine[] = [
-        { id: 'panadol', name: 'Panadol 500mg', generic: 'Paracetamol', price: 120, imgGradient: 'from-rose-50 to-rose-100 text-rose-500', category: 'Pain Relief', stock: 150, purchasePrice: 90, expiryDate: '2026-12-15', status: 'In Stock' },
-        { id: 'brufen', name: 'Brufen 400mg', generic: 'Ibuprofen', price: 150, imgGradient: 'from-indigo-50 to-indigo-100 text-indigo-500', category: 'Pain Relief', stock: 85, purchasePrice: 110, expiryDate: '2026-11-20', status: 'Low Stock' },
-        { id: 'augmentin', name: 'Augmentin 625mg', generic: 'Co-amoxiclav', price: 280, imgGradient: 'from-emerald-50 to-emerald-100 text-[#10b981]', category: 'Antibiotics', stock: 60, purchasePrice: 200, expiryDate: '2026-10-05', status: 'Low Stock' },
-        { id: 'caltrate', name: 'Caltrate Plus', generic: 'Calcium / Vitamin D', price: 950, imgGradient: 'from-amber-50 to-amber-100 text-amber-500', category: 'Vitamins & Supp.', stock: 110, purchasePrice: 650, expiryDate: '2026-09-18', status: 'In Stock' },
-        { id: 'supradyn', name: 'Supradyn', generic: 'Multivitamins & Minerals', price: 850, imgGradient: 'from-sky-50 to-sky-100 text-sky-500', category: 'Vitamins', stock: 95, purchasePrice: 420, expiryDate: '2026-08-30', status: 'In Stock' },
-        { id: 'surbex', name: 'Surbex Z (35 Tablets)', generic: 'Multivitamins', price: 850, imgGradient: 'from-orange-50 to-orange-100 text-orange-500', category: 'Vitamins & Supp.', stock: 40, purchasePrice: 600, expiryDate: '2026-06-25', status: 'Low Stock' }
+        { id: 'panadol', name: 'Panadol 500mg', price: 120, imgGradient: 'from-rose-50 to-rose-100 text-rose-500', category: 'All Medicines', stock: 150, status: 'In Stock' },
+        { id: 'brufen', name: 'Brufen 400mg', price: 150, imgGradient: 'from-indigo-50 to-indigo-100 text-indigo-500', category: 'All Medicines', stock: 85, status: 'Low Stock' },
+        { id: 'augmentin', name: 'Augmentin 625mg', price: 280, imgGradient: 'from-emerald-50 to-emerald-100 text-[#10b981]', category: 'All Medicines', stock: 60, status: 'Low Stock' },
+        { id: 'caltrate', name: 'Caltrate Plus', price: 950, imgGradient: 'from-amber-50 to-amber-100 text-amber-500', category: 'Vitamins & Supplements', stock: 110, status: 'In Stock' },
+        { id: 'supradyn', name: 'Supradyn', price: 850, imgGradient: 'from-sky-50 to-sky-100 text-sky-500', category: 'Vitamins & Supplements', stock: 95, status: 'In Stock' },
+        { id: 'surbex', name: 'Surbex Z (35 Tablets)', price: 850, imgGradient: 'from-orange-50 to-orange-100 text-orange-500', category: 'Vitamins & Supplements', stock: 40, status: 'Low Stock' }
       ];
 
       for (const m of defaultMeds) {
         await db.execute({
-          sql: `INSERT INTO medicines (id, name, generic, price, purchasePrice, imgGradient, imgUrl, category, stock, expiryDate, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          args: [m.id, m.name, m.generic, m.price, m.purchasePrice, m.imgGradient || '', m.imgUrl || '', m.category, m.stock, m.expiryDate, m.status]
+          sql: `INSERT INTO medicines (id, name, price, imgGradient, imgUrl, category, stock, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          args: [m.id, m.name, m.price, m.imgGradient || '', m.imgUrl || '', m.category, m.stock, m.status]
         });
       }
     }
@@ -153,14 +147,11 @@ export async function getMedicines(): Promise<Medicine[]> {
   return res.rows.map(row => ({
     id: String(row.id),
     name: String(row.name),
-    generic: String(row.generic),
     price: Number(row.price),
-    purchasePrice: Number(row.purchasePrice),
     imgGradient: String(row.imgGradient || ''),
     imgUrl: String(row.imgUrl || ''),
     category: String(row.category),
     stock: Number(row.stock),
-    expiryDate: String(row.expiryDate),
     status: row.status as any
   }));
 }
@@ -169,21 +160,45 @@ export async function getMedicines(): Promise<Medicine[]> {
 export async function saveMedicine(m: Medicine): Promise<void> {
   await initializeDB();
   await db.execute({
-    sql: `INSERT INTO medicines (id, name, generic, price, purchasePrice, imgGradient, imgUrl, category, stock, expiryDate, status)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    sql: `INSERT INTO medicines (id, name, price, imgGradient, imgUrl, category, stock, status)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(id) DO UPDATE SET
             name = excluded.name,
-            generic = excluded.generic,
             price = excluded.price,
-            purchasePrice = excluded.purchasePrice,
             imgGradient = excluded.imgGradient,
             imgUrl = excluded.imgUrl,
             category = excluded.category,
             stock = excluded.stock,
-            expiryDate = excluded.expiryDate,
             status = excluded.status`,
-    args: [m.id, m.name, m.generic, m.price, m.purchasePrice, m.imgGradient || '', m.imgUrl || '', m.category, m.stock, m.expiryDate, m.status]
+    args: [m.id, m.name, m.price, m.imgGradient || '', m.imgUrl || '', m.category, m.stock, m.status]
   });
+}
+
+// Bulk Add or Edit Medicines
+export async function bulkSaveMedicines(medicines: Medicine[]): Promise<void> {
+  await initializeDB();
+  const transaction = await db.transaction('write');
+  try {
+    for (const m of medicines) {
+      await transaction.execute({
+        sql: `INSERT INTO medicines (id, name, price, imgGradient, imgUrl, category, stock, status)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+              ON CONFLICT(id) DO UPDATE SET
+                name = excluded.name,
+                price = excluded.price,
+                imgGradient = excluded.imgGradient,
+                imgUrl = excluded.imgUrl,
+                category = excluded.category,
+                stock = excluded.stock,
+                status = excluded.status`,
+        args: [m.id, m.name, m.price, m.imgGradient || '', m.imgUrl || '', m.category, m.stock, m.status]
+      });
+    }
+    await transaction.commit();
+  } catch (err) {
+    await transaction.rollback();
+    throw err;
+  }
 }
 
 // Delete Medicine

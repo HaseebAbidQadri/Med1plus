@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { 
-  Pill, Award, Heart, Sparkles, ShieldCheck, 
-  Search, ChevronDown, ChevronLeft, ChevronRight, 
-  Users, Clock, MapPin, Upload, Truck, MessageSquare, Check, Smile, Phone, ArrowRight, Lock
+import {
+  Pill, Award, Heart, Sparkles, ShieldCheck,
+  Search, ChevronDown, ChevronLeft, ChevronRight,
+  Users, Clock, MapPin, Upload, Truck, MessageSquare, Check, Smile, Phone, ArrowRight, Lock, Activity, UserCheck
 } from 'lucide-react';
 
 // Live Branded Pharmacy Mockups from User Files
@@ -21,7 +21,15 @@ interface HomeOverviewProps {
   onWhatsAppClick: () => void;
   onAddToCart: (item: { id: string; name: string; price: number }) => void;
   cartItems: { id: string; name: string; price: number; quantity: number }[];
-  medicinesList?: any[];
+  medicinesList?: {
+    id: string;
+    name: string;
+    price: number;
+    imgGradient?: string;
+    imgUrl?: string;
+    category: string;
+    [key: string]: any;
+  }[];
 }
 
 export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVisitAbout, onWhatsAppClick, onAddToCart, cartItems, medicinesList }: HomeOverviewProps) {
@@ -29,6 +37,9 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
   const [selectedSearchCat, setSelectedSearchCat] = useState('All Categories');
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+  const [startIndex, setStartIndex] = useState(0);
+  const [tempSearchQuery, setTempSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load real user images from localStorage if uploaded, otherwise fallback to default mockups
@@ -50,7 +61,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
     const customBaby = localStorage.getItem('medone_custom_image_baby');
     const customVitamins = localStorage.getItem('medone_custom_image_vitamins');
     const customFridge = localStorage.getItem('medone_custom_image_fridge');
-    
+
     if (customStorefront) setStorefrontImg(customStorefront);
     if (customHero) setHeroImg(customHero);
     if (customShelves) setShelvesImg(customShelves);
@@ -63,28 +74,46 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
 
   // Categories list for slider
   const categorySliderItems = [
-    { id: 'prescription', label: 'Prescription Medicines', icon: <Pill className="w-5 h-5 text-rose-500" />, color: 'bg-rose-50' },
+    { id: 'all-meds', label: 'All Medicines', icon: <Pill className="w-5 h-5 text-emerald-500" />, color: 'bg-emerald-50' },
     { id: 'vitamins', label: 'Vitamins & Supplements', icon: <Award className="w-5 h-5 text-amber-500" />, color: 'bg-amber-50' },
-    { id: 'healthcare', label: 'Health Care', icon: <Heart className="w-5 h-5 text-red-500" />, color: 'bg-red-50' },
+    { id: 'personal', label: 'Personal Care', icon: <ShieldCheck className="w-5 h-5 text-[#0d5cb5]" />, color: 'bg-blue-50' },
     { id: 'baby', label: 'Baby Care', icon: <Smile className="w-5 h-5 text-sky-500" />, color: 'bg-sky-50' },
     { id: 'skin', label: 'Skin & Hair Care', icon: <Sparkles className="w-5 h-5 text-pink-500" />, color: 'bg-pink-50' },
-    { id: 'personal', label: 'Personal Care', icon: <ShieldCheck className="w-5 h-5 text-[#0d5cb5]" />, color: 'bg-blue-50' },
-    { id: 'all', label: 'View All Categories', icon: <span className="text-xl font-black text-emerald-600 leading-none">•••</span>, color: 'bg-emerald-50' },
+    { id: 'diabetes', label: 'Diabetes Care', icon: <Activity className="w-4.5 h-4.5 text-blue-500" />, color: 'bg-blue-50' },
+    { id: 'elderly', label: 'Elderly Care', icon: <UserCheck className="w-4.5 h-4.5 text-indigo-500" />, color: 'bg-indigo-50' },
   ];
 
   // Core medicines mock list for interactive Grid
   const featuredMedicines = medicinesList || [
-    { id: 'panadol', name: 'Panadol 500mg', generic: 'Paracetamol', price: 120, imgGradient: 'from-rose-50 to-rose-100 text-rose-500', icon: <Pill className="w-12 h-12" /> },
-    { id: 'brufen', name: 'Brufen 400mg', generic: 'Ibuprofen', price: 150, imgGradient: 'from-indigo-50 to-indigo-100 text-indigo-500', icon: <Pill className="w-12 h-12" /> },
-    { id: 'augmentin', name: 'Augmentin 625mg', generic: 'Co-amoxiclav', price: 280, imgGradient: 'from-emerald-50 to-emerald-100 text-[#10b981]', icon: <Pill className="w-12 h-12" /> },
-    { id: 'caltrate', name: 'Caltrate Plus', generic: 'Calcium / Vitamin D', price: 950, imgGradient: 'from-amber-50 to-amber-100 text-amber-500', icon: <Award className="w-12 h-12" /> },
-    { id: 'supradyn', name: 'Supradyn', generic: 'Multivitamins & Minerals', price: 850, imgGradient: 'from-sky-50 to-sky-100 text-sky-500', icon: <Sparkles className="w-12 h-12" /> },
+    { id: 'panadol', name: 'Panadol 500mg', price: 120, imgGradient: 'from-rose-50 to-rose-100 text-rose-500', icon: <Pill className="w-12 h-12" />, imgUrl: '', category: 'Pain Relief' },
+    { id: 'brufen', name: 'Brufen 400mg', price: 150, imgGradient: 'from-indigo-50 to-indigo-100 text-indigo-500', icon: <Pill className="w-12 h-12" />, imgUrl: '', category: 'Pain Relief' },
+    { id: 'augmentin', name: 'Augmentin 625mg', price: 280, imgGradient: 'from-emerald-50 to-emerald-100 text-[#10b981]', icon: <Pill className="w-12 h-12" />, imgUrl: '', category: 'Antibiotics' },
+    { id: 'caltrate', name: 'Caltrate Plus', price: 950, imgGradient: 'from-amber-50 to-amber-100 text-amber-500', icon: <Award className="w-12 h-12" />, imgUrl: '', category: 'Vitamins & Supp.' },
+    { id: 'supradyn', name: 'Supradyn', price: 850, imgGradient: 'from-sky-50 to-sky-100 text-sky-500', icon: <Sparkles className="w-12 h-12" />, imgUrl: '', category: 'Vitamins' },
   ];
 
   const filteredMedicines = featuredMedicines.filter((med) => {
     const term = searchQuery.toLowerCase();
-    return med.name.toLowerCase().includes(term) || med.generic.toLowerCase().includes(term);
+    // Search only filters medicines by name
+    return med.name.toLowerCase().includes(term);
   });
+
+  const nextSlide = () => {
+    if (startIndex + 5 < filteredMedicines.length) {
+      setStartIndex(startIndex + 1);
+    }
+  };
+
+  const prevSlide = () => {
+    if (startIndex > 0) {
+      setStartIndex(startIndex - 1);
+    }
+  };
+
+  // Reset slider when search changes
+  useEffect(() => {
+    setStartIndex(0);
+  }, [searchQuery]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -103,6 +132,33 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
     }
   };
 
+  const handleSearchChange = (val: string) => {
+    setTempSearchQuery(val);
+    setShowSuggestions(val.length > 0);
+  };
+
+  const executeSearch = (val: string = tempSearchQuery) => {
+    setSearchQuery(val);
+    setTempSearchQuery(val);
+    setShowSuggestions(false);
+    if (val.length > 0) {
+      const target = document.getElementById('featured-medicines-section');
+      target?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      executeSearch();
+    }
+  };
+
+  const suggestions = tempSearchQuery.length > 0
+    ? featuredMedicines
+      .filter(m => m.name.toLowerCase().includes(tempSearchQuery.toLowerCase()))
+      .slice(0, 5)
+    : [];
+
   const triggerUploadClick = () => {
     fileInputRef.current?.click();
   };
@@ -113,14 +169,16 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
       setTimeout(() => {
         setIsSubmitSuccessful(false);
         setUploadFile(null);
-        alert('Your prescription has been uploaded successfully! Our certified pharmacist will contact you in a few minutes.');
-      }, 1500);
+
+        const msg = encodeURIComponent("Assalamu Alaikum MedOne+ Pharmacy. I have attached my prescription for review. Please check and guide me on the medicines.");
+        window.open(`https://wa.me/923315569472?text=${msg}`, '_blank');
+      }, 1000);
     }
   };
 
   return (
     <div className="pb-8 overflow-x-hidden">
-      
+
       {/* 1. Hero Header Section */}
       <div className="relative bg-gradient-to-br from-emerald-500/10 via-sky-500/5 to-transparent pt-12 pb-20 text-left overflow-hidden">
         {/* Decorative background visual ambient spots */}
@@ -128,10 +186,10 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
         <div className="absolute bottom-10 right-10 w-72 h-72 bg-[#0d5cb5]/10 rounded-full blur-3xl animate-pulse" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
-          
+
           {/* Hero Left Content Column (7 cols) */}
           <div className="lg:col-span-7 flex flex-col space-y-6 text-left">
-            
+
             {/* Top trusted badge */}
             <div className="inline-flex items-center space-x-2.5 bg-emerald-50 text-emerald-800 border border-emerald-100/40 rounded-full px-4.5 py-2.5 w-fit select-none">
               <span className="w-4.5 h-4.5 bg-[#10b981] text-white rounded-full flex items-center justify-center text-[10px]">✓</span>
@@ -208,16 +266,16 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
           {/* Hero Right visual mockup - Styled real pharmacy desk showcase (5 cols) */}
           <div className="lg:col-span-5 relative flex justify-center lg:justify-end mt-8 lg:mt-0">
             <div className="relative w-full max-w-[440px]">
-              
+
               {/* Flying decorative elements */}
-              <motion.div 
+              <motion.div
                 animate={{ y: [0, -8, 0], rotate: [0, 6, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                 className="absolute -top-6 -left-6 z-20 text-3xl select-none"
               >
                 💚
               </motion.div>
-              <motion.div 
+              <motion.div
                 animate={{ y: [0, 8, 0], rotate: [0, -6, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                 className="absolute -bottom-4 right-8 z-20 text-2xl select-none"
@@ -228,9 +286,9 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
               {/* Real Branch visual showcase frame */}
               <div className="bg-white p-3 rounded-[32px] shadow-2xl border border-slate-100 shadow-slate-300/40 relative overflow-hidden transition-all duration-500 hover:scale-[1.01] group">
                 <div className="relative rounded-[24px] overflow-hidden aspect-[4/3] bg-slate-100 border border-slate-100">
-                  <img 
-                    src={heroImg} 
-                    alt="MedOne+ Pharmacy Counter Checkout" 
+                  <img
+                    src={heroImg}
+                    alt="MedOne+ Pharmacy Counter Checkout"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     referrerPolicy="no-referrer"
                   />
@@ -249,7 +307,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
                         <ShieldCheck className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-black text-slate-900 leading-none">MedOne+ Pharmacy</h4>
+                        <h4 className="text-xs font-black text-[#10b981] leading-none">MedOne<span className="text-[#0d5cb5]">+</span> Pharmacy</h4>
                         <p className="text-[10px] text-slate-400 font-extrabold mt-1">PMDC Certified Setup</p>
                       </div>
                     </div>
@@ -287,28 +345,40 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
         <div className="bg-white p-2.5 rounded-full shadow-2xl border border-slate-100/70 shadow-slate-300/60 flex items-center justify-between">
           <div className="flex items-center space-x-3 pl-4 flex-1">
             <Search className="w-5 h-5 text-slate-400 flex-shrink-0" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for medicines, healthcare products..."
-              className="w-full bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none text-xs sm:text-sm font-sans"
-            />
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={tempSearchQuery}
+                onKeyDown={handleKeyDown}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onFocus={() => tempSearchQuery.length > 0 && setShowSuggestions(true)}
+                placeholder="Search for medicines..."
+                className="w-full bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none text-xs sm:text-sm font-sans"
+              />
+
+              {/* Suggestions Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 py-2">
+                  {suggestions.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => executeSearch(s.name)}
+                      className="w-full text-left px-5 py-3 hover:bg-slate-50 transition-colors flex items-center space-x-3 group"
+                    >
+                      <Search className="w-3.5 h-3.5 text-slate-300 group-hover:text-[#10b981]" />
+                      <span className="text-sm text-slate-600 group-hover:text-slate-900 font-medium">{s.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
-            {/* Category selection selector */}
-            <div className="hidden sm:flex items-center space-x-1 text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-full">
-              <span>{selectedSearchCat}</span>
-              <ChevronDown className="w-3.5 h-3.5" />
-            </div>
 
             {/* Magnifying search badge container click action */}
             <button
-              onClick={() => {
-                const target = document.getElementById('featured-medicines-section');
-                target?.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onClick={() => executeSearch()}
               className="w-11 h-11 bg-[#10b981] hover:bg-[#059669] text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-250 transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
               <Search className="w-4.5 h-4.5" />
@@ -413,7 +483,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mt-12 text-left">
-            
+
             <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-100 hover:border-emerald-100/60 hover:shadow-xl transition-all duration-300">
               <div className="w-10 h-10 bg-emerald-50 rounded-xl text-[#10b981] flex items-center justify-center border border-emerald-100/50 mb-4">
                 <Check className="w-5 h-5" />
@@ -471,7 +541,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
       {/* 6. Healthcare Services We Provide */}
       <div className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
+
           {/* Left Text */}
           <div className="lg:col-span-5 flex flex-col space-y-5">
             <span className="text-xs font-bold text-[#10b981] uppercase tracking-widest bg-emerald-50 px-3.5 py-1.5 rounded-full w-fit">
@@ -495,7 +565,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
 
           {/* Right Cards Stack Grid */}
           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-            
+
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
               <div>
                 <span className="text-xs text-[#10b981] bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full font-bold">Rx Approved</span>
@@ -555,18 +625,37 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
               <div className="w-16 h-1 bg-[#10b981] rounded-full mt-2" />
             </div>
 
-            <button
-              onClick={onBrowseCatalog}
-              className="text-xs font-extrabold text-[#10b981] hover:text-emerald-700 hover:underline flex items-center space-x-1 cursor-pointer"
-            >
-              <span>View All Products</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={prevSlide}
+                disabled={startIndex === 0}
+                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all ${startIndex === 0 ? 'border-slate-100 text-slate-200 cursor-not-allowed' : 'border-slate-200 text-slate-400 hover:text-[#10b981] hover:border-[#10b981] cursor-pointer'
+                  }`}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={nextSlide}
+                disabled={startIndex + 5 >= filteredMedicines.length}
+                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all ${startIndex + 5 >= filteredMedicines.length ? 'border-slate-100 text-slate-200 cursor-not-allowed' : 'border-[#10b981] bg-[#10b981] text-white hover:bg-[#059669] cursor-pointer shadow-lg shadow-emerald-200'
+                  }`}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              <div className="w-px h-6 bg-slate-200 mx-2 hidden sm:block"></div>
+              <button
+                onClick={onBrowseCatalog}
+                className="text-xs font-extrabold text-[#10b981] hover:text-emerald-700 hover:underline flex items-center space-x-1 cursor-pointer"
+              >
+                <span>View All</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
-          {/* Medicines Grid */}
+          {/* Medicines Horizontal Slider */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {filteredMedicines.map((med) => {
+            {filteredMedicines.slice(startIndex, startIndex + 5).map((med) => {
               const cartItem = cartItems.find((c) => c.id === med.id);
               const qty = cartItem ? cartItem.quantity : 0;
 
@@ -577,19 +666,23 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
                 >
                   <div>
                     {/* Medicine Visual Box Placeholder instead of missing external assets */}
-                    <div className={`w-full aspect-[4/3] rounded-2xl bg-gradient-to-br ${med.imgGradient || 'from-teal-50 to-emerald-50 text-emerald-600'} flex items-center justify-center p-4 mb-4`}>
-                      <div className="text-center flex flex-col items-center justify-center">
-                        {typeof med.icon === 'string' || !med.icon ? (
-                          <Pill className="w-12 h-12" />
-                        ) : (
-                          med.icon
-                        )}
-                        <span className="text-[10px] font-bold mt-1.5 block opacity-85">{med.name}</span>
-                      </div>
+                    <div className={`w-full aspect-[4/3] rounded-2xl bg-gradient-to-br ${med.imgGradient || 'from-teal-50 to-emerald-50 text-emerald-600'} flex items-center justify-center overflow-hidden mb-4`}>
+                      {med.imgUrl ? (
+                        <img src={med.imgUrl} alt={med.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="text-center flex flex-col items-center justify-center p-4">
+                          {typeof med.icon === 'string' || !med.icon ? (
+                            <Pill className="w-12 h-12" />
+                          ) : (
+                            med.icon
+                          )}
+                          <span className="text-[10px] font-bold mt-1.5 block opacity-85">{med.name}</span>
+                        </div>
+                      )}
                     </div>
 
                     <span className="text-[10px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded-md uppercase tracking-wider block w-fit">
-                      {med.generic}
+                      {med.category}
                     </span>
 
                     <h3 className="text-sm font-bold text-slate-800 tracking-tight mt-2 min-h-[38px]">
@@ -632,16 +725,16 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
       {/* 8. Upload Prescription Timeline Module */}
       <div className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left" id="upload-prescription-section">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
+
           {/* Left illustration */}
           <div className="lg:col-span-5">
-            <div 
+            <div
               onDragOver={handleDragOver}
               onDrop={handleDrop}
               className="bg-white p-8 rounded-[32px] border-2 border-dashed border-slate-200 shadow-lg text-center flex flex-col items-center justify-center space-y-4 hover:border-[#10b981] hover:bg-emerald-50/10 cursor-pointer transition-all h-[360px]"
               onClick={triggerUploadClick}
             >
-              <input 
+              <input
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileChange}
@@ -689,7 +782,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
             <div>
               <h3 className="text-sm font-black text-slate-850 uppercase tracking-widest mb-4">How It Works?</h3>
               <div className="space-y-4">
-                
+
                 <div className="flex items-start space-x-4">
                   <div className="w-8 h-8 bg-emerald-100 text-[#10b981] rounded-full flex items-center justify-center text-xs font-black font-mono">1</div>
                   <div>
@@ -702,7 +795,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
                   <div className="w-8 h-8 bg-emerald-100 text-[#10b981] rounded-full flex items-center justify-center text-xs font-black font-mono">2</div>
                   <div>
                     <h4 className="text-xs font-black text-slate-900">Review & Confirm</h4>
-                    <p className="text-[11px] text-slate-450 leading-relaxed mt-0.5">Dr. Haseeb Ahmed will match original batches, review quantities, and verify availability.</p>
+                    <p className="text-[11px] text-slate-450 leading-relaxed mt-0.5">pharmacist will match original batches, review quantities, and verify availability.</p>
                   </div>
                 </div>
 
@@ -726,7 +819,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
       <div className="py-16 bg-white border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
+
             {/* Left Content Column */}
             <div className="lg:col-span-12 xl:col-span-5 flex flex-col space-y-6">
               <span className="text-xs font-bold text-[#10b981] uppercase tracking-widest bg-emerald-50 px-3.5 py-1.5 rounded-full w-fit">
@@ -773,7 +866,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
             {/* Right Picture Collage Column (7 cols) */}
             <div className="lg:col-span-12 xl:col-span-7">
               <div className="grid grid-cols-12 gap-4 h-[380px]">
-                
+
                 {/* Image 1: Pharmacy Storefront exterior (Top Left, 7 cols) */}
                 <div className="col-span-7 h-48 rounded-[24px] overflow-hidden border border-slate-100 shadow-md transform hover:scale-[1.01] transition-transform duration-300">
                   <img
@@ -835,7 +928,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
       {/* 10. Visit Us in Lahore Location Section */}
       <div className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left" id="visit-map-section">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
+
           {/* Left Columns details (5 cols) */}
           <div className="lg:col-span-5 flex flex-col space-y-6">
             <span className="text-xs font-bold text-[#10b981] uppercase tracking-widest bg-emerald-50 px-3.5 py-1.5 rounded-full w-fit">
@@ -847,7 +940,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
 
             {/* details card layout */}
             <div className="space-y-4">
-              
+
               <div className="flex items-start space-x-3.5">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100/50 flex items-center justify-center text-[#10b981] flex-shrink-0">
                   <MapPin className="w-4 h-4" />
@@ -884,7 +977,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
           {/* Right Map Mockup Illustration (7 cols) */}
           <div className="lg:col-span-7">
             <div className="bg-slate-100 rounded-[32px] overflow-hidden border border-slate-200/50 h-[360px] relative shadow-lg">
-              
+
               {/* Styled clean vector map contours */}
               <div className="absolute inset-0 bg-[#e2e8f0]">
                 {/* River contour drawing */}
@@ -909,7 +1002,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
               {/* In-map Pharmacy Address Label */}
               <div className="absolute top-6 left-6 z-20 bg-white p-4.5 rounded-2xl shadow-2xl border border-slate-100 max-w-[240px] text-left font-sans text-slate-800">
                 <span className="text-[9px] bg-emerald-50 text-emerald-800 font-extrabold px-2 py-0.5 rounded-md block w-fit">Our Pharmacy</span>
-                <p className="text-xs font-black mt-2">MedOne+ Pharmacy Store</p>
+                <p className="text-xs font-black mt-2 text-[#10b981]">MedOne<span className="text-[#0d5cb5]">+</span> Pharmacy Store</p>
                 <p className="text-[10px] text-slate-400 mt-1">Dharampura Bazar, Lahore.</p>
                 <a
                   href="https://maps.google.com"
@@ -933,9 +1026,9 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
           <div className="flex items-center space-x-5 mb-6 md:mb-0">
             <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0 text-white">
               {/* WhatsApp icon */}
-              <svg 
-                className="w-7 h-7 fill-current" 
-                viewBox="0 0 24 24" 
+              <svg
+                className="w-7 h-7 fill-current"
+                viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.705 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />

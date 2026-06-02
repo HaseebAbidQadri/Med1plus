@@ -1,16 +1,17 @@
 import { Router, Request, Response } from 'express';
-import { 
-  getMedicines, 
-  saveMedicine, 
-  deleteMedicine, 
-  getOrders, 
-  saveOrder, 
-  updateOrderStatus, 
+import {
+  getMedicines,
+  saveMedicine,
+  deleteMedicine,
+  getOrders,
+  saveOrder,
+  updateOrderStatus,
   createAdminSession,
   verifyAdminSession,
   deleteAdminSession,
-  Medicine, 
-  Order 
+  bulkSaveMedicines,
+  Medicine,
+  Order
 } from './db';
 
 const router = Router();
@@ -29,7 +30,7 @@ router.post('/auth/login', async (req: Request, res: Response) => {
     const expectedPassword = process.env.ADMIN_PASSWORD || 'admin123';
 
     const inputEmail = email.toLowerCase().trim();
-    
+
     // Secure verification directly against env credentials
     const isEmailValid = inputEmail === expectedEmail;
     const isPasswordValid = password === expectedPassword;
@@ -65,7 +66,7 @@ router.get('/auth/verify', async (req: Request, res: Response) => {
     const isValid = await verifyAdminSession(token);
 
     if (isValid) {
-      res.json({ 
+      res.json({
         verified: true,
         admin: {
           email: process.env.ADMIN_EMAIL || 'admin@medonepharmacy.com',
@@ -108,8 +109,8 @@ router.get('/medicines', async (req: Request, res: Response) => {
 
 router.post('/medicines', async (req: Request, res: Response) => {
   try {
-    const { id, name, generic, price, purchasePrice, category, stock, expiryDate, imgGradient, imgUrl } = req.body;
-    
+    const { id, name, price, category, stock, imgGradient, imgUrl } = req.body;
+
     if (!name || isNaN(Number(price)) || isNaN(Number(stock))) {
       res.status(400).json({ error: 'Name, valid price, and stock are required.' });
       return;
@@ -117,9 +118,8 @@ router.post('/medicines', async (req: Request, res: Response) => {
 
     const medId = id || name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now();
     const priceNum = Number(price);
-    const purchasePriceNum = isNaN(Number(purchasePrice)) ? priceNum * 0.7 : Number(purchasePrice);
     const stockNum = Number(stock);
-    
+
     // Calculate status matching client validation logic
     let calculatedStatus: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Expired Soon' = 'In Stock';
     if (stockNum === 0) {
@@ -131,12 +131,9 @@ router.post('/medicines', async (req: Request, res: Response) => {
     const newMedicine: Medicine = {
       id: medId,
       name,
-      generic: generic || 'Generic Formula',
       price: priceNum,
-      purchasePrice: purchasePriceNum,
       category: category || 'General Medicine',
       stock: stockNum,
-      expiryDate: expiryDate || '2026-12-15',
       imgGradient: imgGradient || 'from-sky-50 to-sky-100 text-sky-500',
       imgUrl: imgUrl || '',
       status: calculatedStatus
@@ -147,6 +144,43 @@ router.post('/medicines', async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error('Error in POST /medicines:', err);
     res.status(500).json({ error: 'Failed to save medicine product.' });
+  }
+});
+
+router.post('/medicines/bulk', async (req: Request, res: Response) => {
+  try {
+    const { medicines } = req.body;
+    if (!Array.isArray(medicines)) {
+      res.status(400).json({ error: 'Payload must contain a "medicines" array.' });
+      return;
+    }
+
+    const processedMeds: Medicine[] = medicines.map((m: any) => {
+      const stockNum = Number(m.stock);
+      let calculatedStatus: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Expired Soon' = 'In Stock';
+      if (stockNum === 0) {
+        calculatedStatus = 'Out of Stock';
+      } else if (stockNum <= 25) {
+        calculatedStatus = 'Low Stock';
+      }
+
+      return {
+        id: m.id || m.name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+        name: m.name,
+        price: Number(m.price),
+        category: m.category || 'General Medicine',
+        stock: stockNum,
+        imgGradient: m.imgGradient || 'from-sky-50 to-sky-100 text-sky-500',
+        imgUrl: m.imgUrl || '',
+        status: calculatedStatus
+      };
+    });
+
+    await bulkSaveMedicines(processedMeds);
+    res.json({ success: true, count: processedMeds.length });
+  } catch (err: any) {
+    console.error('Error in POST /medicines/bulk:', err);
+    res.status(500).json({ error: 'Failed to bulk save medicine products.' });
   }
 });
 
@@ -217,7 +251,7 @@ router.post('/orders/:id/status', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    
+
     if (!status) {
       res.status(400).json({ error: 'Status is required' });
       return;

@@ -10,8 +10,8 @@ import WhatsAppChat from './components/WhatsAppChat';
 import AdminSignIn from './components/AdminSignIn';
 import AdminDashboard from './components/AdminDashboard';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Heart, Pill, Truck, ShieldCheck, 
+import {
+  Heart, Pill, Truck, ShieldCheck,
   MapPin, Clock, MessageSquare, Sparkles, ArrowRight,
   Search, Lock, Phone, Upload, ChevronLeft, ChevronRight, Users, Smile, Award, Check, ShoppingCart, UserCheck, ShieldAlert, BadgeCheck, FileText, CheckCircle2, ChevronDown
 } from 'lucide-react';
@@ -25,12 +25,12 @@ export default function App() {
 
   // List of clinical medicines which is passed down and shared globally!
   const [medicines, setMedicines] = useState([
-    { id: 'panadol', name: 'Panadol 500mg', generic: 'Paracetamol', price: 120, imgGradient: 'from-rose-50 to-rose-100 text-rose-500', category: 'Pain Relief', stock: 150, purchasePrice: 90, expiryDate: '2026-12-15', status: 'In Stock' as const },
-    { id: 'brufen', name: 'Brufen 400mg', generic: 'Ibuprofen', price: 150, imgGradient: 'from-indigo-50 to-indigo-100 text-indigo-500', category: 'Pain Relief', stock: 85, purchasePrice: 110, expiryDate: '2026-11-20', status: 'Low Stock' as const },
-    { id: 'augmentin', name: 'Augmentin 625mg', generic: 'Co-amoxiclav', price: 280, imgGradient: 'from-emerald-50 to-emerald-100 text-[#10b981]', category: 'Antibiotics', stock: 60, purchasePrice: 200, expiryDate: '2026-10-05', status: 'Low Stock' as const },
-    { id: 'caltrate', name: 'Caltrate Plus', generic: 'Calcium / Vitamin D', price: 950, imgGradient: 'from-amber-50 to-amber-100 text-amber-500', category: 'Vitamins & Supp.', stock: 110, purchasePrice: 650, expiryDate: '2026-09-18', status: 'In Stock' as const },
-    { id: 'supradyn', name: 'Supradyn', generic: 'Multivitamins & Minerals', price: 850, imgGradient: 'from-sky-50 to-sky-100 text-sky-500', category: 'Vitamins', stock: 95, purchasePrice: 420, expiryDate: '2026-08-30', status: 'In Stock' as const },
-    { id: 'surbex', name: 'Surbex Z (35 Tablets)', generic: 'Multivitamins', price: 850, imgGradient: 'from-orange-50 to-orange-100 text-orange-500', category: 'Vitamins & Supp.', stock: 40, purchasePrice: 600, expiryDate: '2026-06-25', status: 'Low Stock' as const }
+    { id: 'panadol', name: 'Panadol 500mg', price: 120, imgGradient: 'from-rose-50 to-rose-100 text-rose-500', category: 'All Medicines', stock: 150, status: 'In Stock' as const, imgUrl: '' },
+    { id: 'brufen', name: 'Brufen 400mg', price: 150, imgGradient: 'from-indigo-50 to-indigo-100 text-indigo-500', category: 'All Medicines', stock: 85, status: 'Low Stock' as const, imgUrl: '' },
+    { id: 'augmentin', name: 'Augmentin 625mg', price: 280, imgGradient: 'from-emerald-50 to-emerald-100 text-[#10b981]', category: 'All Medicines', stock: 60, status: 'Low Stock' as const, imgUrl: '' },
+    { id: 'caltrate', name: 'Caltrate Plus', price: 950, imgGradient: 'from-amber-50 to-amber-100 text-amber-500', category: 'Vitamins & Supplements', stock: 110, status: 'In Stock' as const, imgUrl: '' },
+    { id: 'supradyn', name: 'Supradyn', price: 850, imgGradient: 'from-sky-50 to-sky-100 text-sky-500', category: 'Vitamins & Supplements', stock: 95, status: 'In Stock' as const, imgUrl: '' },
+    { id: 'surbex', name: 'Surbex Z (35 Tablets)', price: 850, imgGradient: 'from-orange-50 to-orange-100 text-orange-500', category: 'Vitamins & Supplements', stock: 40, status: 'Low Stock' as const, imgUrl: '' }
   ]);
 
   // List of simulated incoming customer checkout orders
@@ -136,7 +136,7 @@ export default function App() {
     const listString = cart.map(c => `• ${c.quantity}x ${c.name} (PKR ${c.price * c.quantity})`).join('\n');
     const itemsDescription = cart.map(c => `${c.quantity}x ${c.name}`).join(', ');
     const msg = `Assalamu Alaikum MedOne+ Pharmacy / Dr. Haseeb Ahmed, RPh. I would like to place an order from your website:\n\n${listString}\n\n*Total Amount: PKR ${cartTotal}*\n\nPlease confirm availability and details. Thank you!`;
-    
+
     // Create checkout order on backend
     const orderPayload = {
       customerName: 'Guest Customer (Web Checkout)',
@@ -195,12 +195,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col relative font-sans">
-      
+
       {/* Top Header Navigation */}
-      <Header 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        onWhatsAppClick={handleWhatsAppTrigger} 
+      <Header
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onWhatsAppClick={handleWhatsAppTrigger}
         isAdminLoggedIn={isAdminLoggedIn}
         onLogout={handleLogout}
       />
@@ -216,11 +216,11 @@ export default function App() {
             transition={{ duration: 0.35, ease: 'easeInOut' }}
           >
             {activeTab === 'home' && (
-              <HomeOverview 
+              <HomeOverview
                 onBrowseCatalog={() => {
                   setActiveTab('categories');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
-                }} 
+                }}
                 onExploreServices={() => {
                   setActiveTab('services');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -237,7 +237,11 @@ export default function App() {
             )}
 
             {activeTab === 'categories' && (
-              <CategoriesView />
+              <CategoriesView
+                medicinesList={medicines}
+                onAddToCart={handleAddToCart}
+                cartItems={cart}
+              />
             )}
 
             {activeTab === 'services' && (
@@ -254,7 +258,7 @@ export default function App() {
 
             {activeTab === 'admin' && (
               isAdminLoggedIn ? (
-                <AdminDashboard 
+                <AdminDashboard
                   onLogout={handleLogout}
                   medicinesList={medicines}
                   setMedicinesList={setMedicines}
@@ -315,12 +319,20 @@ export default function App() {
                     <p className="text-[10px] text-sky-200">Review medicines for MedOne+ dispatch</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setCartOpen(false)}
-                  className="p-1.5 px-3 bg-white/10 hover:bg-white/20 rounded-lg text-white font-bold transition-all text-xs"
-                >
-                  Close
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setCart([])}
+                    className="p-1.5 px-3 bg-rose-500/20 hover:bg-rose-500/40 text-rose-100 font-bold rounded-lg transition-all text-[10px] flex items-center space-x-1 border border-rose-500/30"
+                  >
+                    <span>Clear All</span>
+                  </button>
+                  <button
+                    onClick={() => setCartOpen(false)}
+                    className="p-1.5 px-3 bg-white/10 hover:bg-white/20 rounded-lg text-white font-bold transition-all text-xs"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
 
               <div className="flex-1 p-5 overflow-y-auto space-y-4 text-left">
@@ -395,8 +407,8 @@ export default function App() {
                   <Logo size="sm" />
                 </div>
                 <div>
-                  <span className="text-xl font-bold tracking-tight text-white block">MedOne+</span>
-                  <span className="text-[9px] tracking-[0.25em] text-[#10b981] font-bold block">PHARMACY</span>
+                  <span className="text-xl font-bold tracking-tight text-[#10b981] block">MedOne<span className="text-[#0d5cb5]">+</span></span>
+                  <span className="text-[9px] tracking-[0.25em] text-[#0d5cb5] font-bold block uppercase">PHARMACY</span>
                 </div>
               </div>
               <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
@@ -435,9 +447,9 @@ export default function App() {
       </footer>
 
       {/* Interactive WhatsApp Live Chat Widget */}
-      <WhatsAppChat 
-        isOpen={whatsappOpen} 
-        onClose={() => setWhatsappOpen(false)} 
+      <WhatsAppChat
+        isOpen={whatsappOpen}
+        onClose={() => setWhatsappOpen(false)}
       />
 
     </div>

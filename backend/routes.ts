@@ -13,8 +13,11 @@ import {
   Medicine,
   Order
 } from './db';
+import multer from 'multer';
+import { uploadImage } from './cloudinary';
 
 const router = Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 // 0. Admin Authentication/Authorization Endpoints
 router.post('/auth/login', async (req: Request, res: Response) => {
@@ -265,14 +268,28 @@ router.post('/orders/:id/status', async (req: Request, res: Response) => {
   }
 });
 
-// 3. Image uploading endpoint (stores base64 string mock or placeholder)
-router.post('/upload-image', (req: Request, res: Response) => {
-  const { imageData } = req.body;
-  if (!imageData) {
-    res.status(400).json({ error: 'No image data provided' });
-    return;
+// 3. Image uploading endpoint using Cloudinary
+router.post('/upload-image', upload.single('image'), async (req: any, res: Response) => {
+  try {
+    if (!req.file) {
+      // Fallback for base64 if needed, though we prefer file
+      const { imageData } = req.body;
+      if (imageData) {
+        // If it's a base64 string, we can still upload it to Cloudinary
+        const result = await uploadImage(Buffer.from(imageData.split(',')[1], 'base64'));
+        res.json({ url: result });
+        return;
+      }
+      res.status(400).json({ error: 'No image file or data provided' });
+      return;
+    }
+
+    const imageUrl = await uploadImage(req.file.buffer);
+    res.json({ url: imageUrl });
+  } catch (err: any) {
+    console.error('Error in POST /upload-image:', err);
+    res.status(500).json({ error: 'Failed to upload image to Cloudinary.' });
   }
-  res.json({ url: imageData });
 });
 
 export default router;

@@ -202,12 +202,31 @@ export default function AdminDashboard({
     const purchasePriceNum = priceNum * 0.7; // default margin
     const stockNum = parseInt(newMedStock);
 
+    let finalImgUrl = newMedImage || '';
+
+    // If we have a base64 image, upload it to Cloudinary first
+    if (newMedImage && newMedImage.startsWith('data:')) {
+      try {
+        const uploadRes = await fetch('/api/upload-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageData: newMedImage })
+        });
+        if (uploadRes.ok) {
+          const { url } = await uploadRes.json();
+          finalImgUrl = url;
+        }
+      } catch (err) {
+        console.error('Cloudinary upload failed, falling back to base64:', err);
+      }
+    }
+
     const medPayload = {
       name: newMedName,
       category: newMedCategory,
       price: priceNum,
       stock: stockNum,
-      imgUrl: newMedImage || '',
+      imgUrl: finalImgUrl,
       imgGradient: 'from-emerald-50 to-indigo-50 text-emerald-650'
     };
 

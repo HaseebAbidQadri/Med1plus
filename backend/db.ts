@@ -69,7 +69,7 @@ export async function initializeDB() {
         name TEXT NOT NULL,
         price REAL NOT NULL,
         imgGradient TEXT,
-        imgUrl TEXT,
+        imgUrl STRING,
         category TEXT NOT NULL,
         stock INTEGER NOT NULL,
         status TEXT NOT NULL

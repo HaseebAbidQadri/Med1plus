@@ -275,14 +275,14 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
                 transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                 className="absolute -top-6 -left-6 z-20 text-3xl select-none"
               >
-                💚
+                
               </motion.div>
               <motion.div
                 animate={{ y: [0, 8, 0], rotate: [0, -6, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                 className="absolute -bottom-4 right-8 z-20 text-2xl select-none"
               >
-                💊
+            
               </motion.div>
 
               {/* Real Branch visual showcase frame */}
@@ -323,7 +323,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
                   </p>
 
                   {/* Badges strip */}
-                  <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-50 font-sans">
+                  {/* <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-50 font-sans">
                     <span className="text-[9px] bg-slate-50 text-slate-550 text-slate-500 font-extrabold px-2.5 py-1 rounded-full border border-slate-100">
                       📍 Dharampura Bazar, Lahore
                     </span>
@@ -333,7 +333,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
                     <span className="text-[9px] bg-emerald-50/60 text-[#10b981] font-extrabold px-2.5 py-1 rounded-full border border-emerald-100/50">
                       🟢 Pharmacist On Duty
                     </span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -660,7 +660,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
             {filteredMedicines.slice(startIndex, startIndex + 5).map((med) => {
               const cartItem = cartItems.find((c) => c.id === med.id);
               const qty = cartItem ? cartItem.quantity : 0;
-
+              console.log('HomeOverview imgUrl:', med.imgUrl);
               return (
                 <div
                   key={med.id}

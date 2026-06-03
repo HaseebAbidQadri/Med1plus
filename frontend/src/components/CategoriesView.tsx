@@ -209,6 +209,7 @@ export default function CategoriesView({ onSelectCategory, medicinesList, onAddT
                       {medsForCat.map((med) => {
                         const cartItem = cartItems.find((c: any) => c.id === med.id);
                         const qty = cartItem ? cartItem.quantity : 0;
+                        console.log('CategoriesView imgUrl:', med.imgUrl);
                         return (
                           <div
                             key={med.id}

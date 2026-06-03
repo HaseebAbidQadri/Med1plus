@@ -45,6 +45,7 @@ export default function App() {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
+          console.log('App fetch first medicine:', data[0]);
           setMedicines(data);
         }
       })

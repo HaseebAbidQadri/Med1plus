@@ -1,16 +1,17 @@
-import { 
-  Heart, ShoppingBag, Truck, MessageCircle, 
+import {
+  Heart, ShoppingBag, Truck, MessageCircle,
   Activity, Award, ShieldAlert, HeartPulse, UserRound
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ServiceItem } from '../types';
+import { CONTACT_CONFIG } from '../constants';
 
 interface ServicesViewProps {
   onWhatsAppClick: () => void;
 }
 
 export default function ServicesView({ onWhatsAppClick }: ServicesViewProps) {
-  
+
   const services: ServiceItem[] = [
     {
       id: 'prescription',
@@ -87,14 +88,14 @@ export default function ServicesView({ onWhatsAppClick }: ServicesViewProps) {
 
   return (
     <div className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
+
       {/* Top Section Info & Doctor Graphics Layer */}
       <span className="text-xs font-bold tracking-widest text-[#10b981] uppercase block mb-3 animate-pulse">
         Our Services
       </span>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-16">
-        
+
         {/* Left Side Content Description */}
         <div className="lg:col-span-7 flex flex-col space-y-5">
           <h1 className="text-3xl md:text-5xl font-black font-display tracking-tight text-slate-900 leading-[1.15]">
@@ -118,26 +119,26 @@ export default function ServicesView({ onWhatsAppClick }: ServicesViewProps) {
 
         {/* Right Side Image Graphic Section with Floating Leafs */}
         <div className="lg:col-span-5 relative flex justify-center">
-          
+
           {/* Animated decorative bubble background shapes */}
           <div className="absolute -top-12 -left-12 w-48 h-48 bg-[#10b981]/5 rounded-full blur-3xl" />
           <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#0d5cb5]/5 rounded-full blur-3xl" />
 
           {/* Pharmacist photo container */}
           <div className="relative w-full max-w-md h-64 md:h-72 rounded-[32px] overflow-hidden shadow-2xl shadow-slate-200 border border-white/80 group">
-            <img 
-              src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=700" 
-              alt="Licensed Pharmacist Dispensing Medicine" 
+            <img
+              src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=700"
+              alt="Licensed Pharmacist Dispensing Medicine"
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
             {/* Glassmorphism gradient overlays */}
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
-            
+
             <div className="absolute bottom-5 left-5 right-5 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-white/50 shadow-lg flex items-center justify-between">
               <div className="flex flex-col text-left">
                 <span className="text-xs font-bold text-[#10b981] uppercase tracking-wider">On-Duty Expert</span>
-                <span className="text-sm font-bold text-slate-800">Dr. Haseeb Ahmed, RPh</span>
+                <span className="text-sm font-bold text-slate-800">Naveed Akhtar</span>
               </div>
               <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
                 Active Now
@@ -176,7 +177,7 @@ export default function ServicesView({ onWhatsAppClick }: ServicesViewProps) {
               <h3 className="text-base sm:text-lg font-bold font-display text-slate-800 group-hover:text-[#10b981] transition-colors leading-snug">
                 {service.title}
               </h3>
-              
+
               <p className="text-xs sm:text-sm text-slate-500 mt-3 leading-relaxed">
                 {service.description}
               </p>

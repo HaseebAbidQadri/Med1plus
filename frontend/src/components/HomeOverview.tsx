@@ -14,6 +14,8 @@ import pharmacyStorefrontImg from '../assets/images/pharmacy_storefront_17797325
 // -------------------------------------------------------------
 // Beautiful Landing Page Overview (Used for activeTab: 'home')
 // -------------------------------------------------------------
+import { CONTACT_CONFIG } from '../constants';
+
 interface HomeOverviewProps {
   onBrowseCatalog: () => void;
   onExploreServices: () => void;
@@ -171,7 +173,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
         setUploadFile(null);
 
         const msg = encodeURIComponent("Assalamu Alaikum MedOne+ Pharmacy. I have attached my prescription for review. Please check and guide me on the medicines.");
-        window.open(`https://wa.me/923315569472?text=${msg}`, '_blank');
+        window.open(CONTACT_CONFIG.whatsappUrl("Assalamu Alaikum MedOne+ Pharmacy. I have attached my prescription for review. Please check and guide me on the medicines."), '_blank');
       }, 1000);
     }
   };
@@ -243,7 +245,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
                 <span>Upload Prescription</span>
               </button>
               <a
-                href="tel:+923001234567"
+                href={`tel:${CONTACT_CONFIG.phone}`}
                 className="px-7 py-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-extrabold rounded-2xl text-sm shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center space-x-2 w-full sm:w-auto"
               >
                 <Phone className="w-4.5 h-4.5" />
@@ -967,7 +969,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
                 </div>
                 <div>
                   <h4 className="text-xs font-bold text-slate-800">Phone Contact</h4>
-                  <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">+92 300 1234567</p>
+                  <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">{CONTACT_CONFIG.phone}</p>
                 </div>
               </div>
 

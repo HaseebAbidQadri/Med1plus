@@ -4,6 +4,7 @@ import {
   MapPin, Phone, MessageSquare, Menu, X,
   Lock, LogOut, ShieldCheck, ArrowLeft, Pill, Activity, User
 } from 'lucide-react';
+import { CONTACT_CONFIG } from '../constants';
 
 interface HeaderProps {
   activeTab: string;
@@ -203,7 +204,7 @@ export default function Header({
 
                   {/* Phone Helpline */}
                   <a
-                    href="tel:+923001234567"
+                    href={`tel:${CONTACT_CONFIG.phone}`}
                     className="w-10 h-10 rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-[#10b981] flex items-center justify-center border border-slate-100 transition-all hover:scale-105"
                     title="Call Pharmacist"
                     id="phone-button-header"
@@ -225,7 +226,7 @@ export default function Header({
                 </button>
               ) : (
                 <button
-                  onClick={() => window.open('https://wa.me/923285154210', '_blank')}
+                  onClick={() => window.open(CONTACT_CONFIG.whatsappUrl(), '_blank')}
                   id="whatsapp-header-button"
                   className="px-5 py-2.5 bg-[#10b981] hover:bg-[#059669] text-white rounded-full shadow-md hover:shadow-lg hover:shadow-emerald-100 font-extrabold text-xs transition-all duration-300 flex items-center space-x-2 active:scale-95 hover:-translate-y-0.5 cursor-pointer"
                 >
@@ -244,7 +245,7 @@ export default function Header({
             {/* Mobile Actions Drawer Toggles */}
             <div className="flex md:hidden items-center space-x-2">
               <a
-                href="tel:+923001234567"
+                href={`tel:${CONTACT_CONFIG.phone}`}
                 className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center border border-slate-100"
               >
                 <Phone className="w-4 h-4" />
@@ -341,7 +342,7 @@ export default function Header({
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    window.open('https://wa.me/923315569472', '_blank');
+                    window.open(CONTACT_CONFIG.whatsappUrl(), '_blank');
                   }}
                   className="w-full py-3 bg-[#10b981] hover:bg-[#059669] text-white rounded-full font-extrabold text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-100"
                 >

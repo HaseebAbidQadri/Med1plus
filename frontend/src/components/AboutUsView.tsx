@@ -26,7 +26,7 @@ export default function AboutUsView({ onVisitStoreClick }: AboutUsViewProps) {
     if (customPharmacist) setPharmacistImg(customPharmacist);
     if (customWaiting) setWaitingImg(customWaiting);
   }, []);
-  
+
   const stats = [
     {
       id: 'customers',
@@ -63,7 +63,7 @@ export default function AboutUsView({ onVisitStoreClick }: AboutUsViewProps) {
 
   return (
     <div className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
+
       {/* Breadcrumb Info Label */}
       <span className="text-xs font-bold tracking-widest text-[#10b981] uppercase block mb-3 animate-pulse">
         About Us
@@ -71,7 +71,7 @@ export default function AboutUsView({ onVisitStoreClick }: AboutUsViewProps) {
 
       {/* Hero Section Split Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-16">
-        
+
         {/* Left Hand Text Info Block */}
         <div className="lg:col-span-12 xl:col-span-5 flex flex-col space-y-5 text-left">
           <h1 className="text-3xl md:text-5xl font-black font-display tracking-tight text-slate-900 leading-[1.15]">
@@ -81,7 +81,7 @@ export default function AboutUsView({ onVisitStoreClick }: AboutUsViewProps) {
               <span className="absolute left-0 bottom-1 w-full h-1.5 bg-emerald-100 -skew-x-12 rounded-full -z-10" />
             </span>
           </h1>
-          
+
           <p className="text-base text-slate-500 leading-relaxed">
             MedOne+ Pharmacy is committed to providing genuine medicines, quality healthcare products, and exceptional customer care to the community. Every pharmaceutical item passes through safe batch verification and strict cold-chain maintenance guidelines.
           </p>
@@ -113,12 +113,12 @@ export default function AboutUsView({ onVisitStoreClick }: AboutUsViewProps) {
         {/* Right Hand Bento Picture Collage Grid */}
         <div className="lg:col-span-12 xl:col-span-7">
           <div className="grid grid-cols-12 gap-4 h-[440px]">
-            
+
             {/* 1. Storefront pharmacy display (Top Left, 7 cols) */}
             <div className="col-span-7 h-56 rounded-[32px] overflow-hidden shadow-xl shadow-slate-200/40 border border-slate-100 group relative">
-              <img 
-                src={storefrontImg} 
-                alt="MedOne+ Pharmacy modern entrance shelf" 
+              <img
+                src={storefrontImg}
+                alt="MedOne+ Pharmacy modern entrance shelf"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
@@ -130,9 +130,9 @@ export default function AboutUsView({ onVisitStoreClick }: AboutUsViewProps) {
 
             {/* 2. Organized medicine boxes packages (Top Right, 5 cols) */}
             <div className="col-span-5 h-56 rounded-[32px] overflow-hidden shadow-xl shadow-slate-200/40 border border-slate-100 group relative">
-              <img 
-                src={shelvesImg} 
-                alt="Neat stacked pills packaging" 
+              <img
+                src={shelvesImg}
+                alt="Neat stacked pills packaging"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
@@ -143,9 +143,9 @@ export default function AboutUsView({ onVisitStoreClick }: AboutUsViewProps) {
 
             {/* 3. Product Display Shelf (Bottom Left, 3 cols) */}
             <div className="col-span-3 h-[180px] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200/40 border border-slate-100 group hidden sm:block relative">
-              <img 
-                src={vitaminsImg} 
-                alt="Dermatological skincare bottles" 
+              <img
+                src={vitaminsImg}
+                alt="Dermatological skincare bottles"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
@@ -156,23 +156,23 @@ export default function AboutUsView({ onVisitStoreClick }: AboutUsViewProps) {
 
             {/* 4. Smiling Pharmacist professional man (Bottom Middle, 5 cols or 6 cols) */}
             <div className="col-span-6 sm:col-span-5 h-[180px] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200/40 border border-slate-100 group relative">
-              <img 
-                src={pharmacistImg} 
-                alt="Lead Pharmacist at MedOne+" 
+              <img
+                src={pharmacistImg}
+                alt="Lead Pharmacist at MedOne+"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/60 to-transparent p-4 text-left">
                 <span className="text-[10px] uppercase font-bold text-emerald-400">RPh Specialist</span>
-                <span className="text-xs font-bold text-white block">Dr. Haseeb Ahmed</span>
+                <span className="text-xs font-bold text-white block">Naveed Akhtar</span>
               </div>
             </div>
 
             {/* 5. Cozy Clinic Waiting Lounge (Bottom Right, 6 cols or 4 cols) */}
             <div className="col-span-6 sm:col-span-4 h-[180px] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200/40 border border-slate-100 group relative">
-              <img 
-                src={waitingImg} 
-                alt="Cozy clinical interior counter" 
+              <img
+                src={waitingImg}
+                alt="Cozy clinical interior counter"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />

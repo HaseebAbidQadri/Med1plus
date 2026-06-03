@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  MapPin, Phone, Mail, Clock, Send, 
-  CheckCircle2, Compass, ArrowUpRight, MessageSquare 
+import {
+  MapPin, Phone, Mail, Clock, Send,
+  CheckCircle2, Compass, ArrowUpRight, MessageSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { CONTACT_CONFIG } from '../constants';
 
 interface ContactUsViewProps {
   onWhatsAppClick: () => void;
@@ -19,25 +20,26 @@ export default function ContactUsView({ onWhatsAppClick }: ContactUsViewProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedName, setSubmittedName] = useState('');
   const [showToast, setShowToast] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const contactDetails = [
     {
       id: 'location',
       icon: <MapPin className="w-5 h-5 text-[#10b981]" />,
       label: 'Our Location',
-      value: 'Dharampura Bazar, Lahore, Pakistan'
+      value: CONTACT_CONFIG.address
     },
     {
       id: 'phone',
       icon: <Phone className="w-5 h-5 text-[#10b981]" />,
       label: 'Phone Number',
-      value: '+92 300 1234567'
+      value: CONTACT_CONFIG.phone
     },
     {
       id: 'email',
       icon: <Mail className="w-5 h-5 text-[#10b981]" />,
       label: 'Email Address',
-      value: 'info@medoneplus.com'
+      value: CONTACT_CONFIG.email
     },
     {
       id: 'hours',
@@ -52,9 +54,29 @@ export default function ContactUsView({ onWhatsAppClick }: ContactUsViewProps) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+
+    const phoneRegex = /^\+?92\d{10}$|^03\d{9}$/;
+    if (formData.phone && !phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+      newErrors.phone = 'Format: +92XXXXXXXXXX or 03XXXXXXXXX';
+    }
+
+    if (!formData.message.trim()) newErrors.message = 'Message cannot be empty';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name) return;
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     setSubmittedName(formData.name);
@@ -64,7 +86,8 @@ export default function ContactUsView({ onWhatsAppClick }: ContactUsViewProps) {
       setIsSubmitting(false);
       setShowToast(true);
       setFormData({ name: '', phone: '', email: '', message: '' });
-      
+      setErrors({});
+
       // Auto-hide toast
       setTimeout(() => {
         setShowToast(false);
@@ -74,7 +97,7 @@ export default function ContactUsView({ onWhatsAppClick }: ContactUsViewProps) {
 
   return (
     <div className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-      
+
       {/* Toast Notification for form submission success */}
       <AnimatePresence>
         {showToast && (
@@ -102,7 +125,7 @@ export default function ContactUsView({ onWhatsAppClick }: ContactUsViewProps) {
 
       {/* Grid: 3 columns layout (Info, Form, Map) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16 items-stretch">
-        
+
         {/* Column 1: "We Are Here to Help" details */}
         <div className="lg:col-span-4 bg-white p-7 rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col space-y-6 text-left justify-between">
           <div>
@@ -142,8 +165,8 @@ export default function ContactUsView({ onWhatsAppClick }: ContactUsViewProps) {
                 <p className="text-[10px] text-slate-400">On-call 24 hours a day</p>
               </div>
             </div>
-            <a 
-              href="tel:+923001234567" 
+            <a
+              href={`tel:${CONTACT_CONFIG.phone}`}
               className="text-xs font-bold text-white bg-[#0d5cb5] px-3.5 py-1.5 rounded-full hover:bg-blue-700 shadow-sm"
             >
               Call
@@ -162,51 +185,62 @@ export default function ContactUsView({ onWhatsAppClick }: ContactUsViewProps) {
 
           <form onSubmit={handleFormSubmit} className="space-y-4 mt-5">
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Your Name</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between">
+                <span>Your Name</span>
+                {errors.name && <span className="text-rose-500 normal-case font-medium">{errors.name}</span>}
+              </label>
               <input
                 type="text"
                 name="name"
-                required
                 placeholder="John Doe"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full px-4.5 py-3.5 bg-slate-50 border border-slate-200/60 rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 focus:border-[#10b981] focus:bg-white transition-all"
+                className={`w-full px-4.5 py-3.5 bg-slate-50 border ${errors.name ? 'border-rose-300 ring-2 ring-rose-50' : 'border-slate-200/60'} rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 focus:border-[#10b981] focus:bg-white transition-all`}
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Phone Number</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between">
+                <span>Phone Number</span>
+                {errors.phone && <span className="text-rose-500 normal-case font-medium">{errors.phone}</span>}
+              </label>
               <input
                 type="tel"
                 name="phone"
                 placeholder="+92 3XX XXXXXXX"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full px-4.5 py-3.5 bg-slate-50 border border-slate-200/60 rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 focus:border-[#10b981] focus:bg-white transition-all"
+                className={`w-full px-4.5 py-3.5 bg-slate-50 border ${errors.phone ? 'border-rose-300 ring-2 ring-rose-50' : 'border-slate-200/60'} rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 focus:border-[#10b981] focus:bg-white transition-all`}
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Email Address</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between">
+                <span>Email Address</span>
+                {errors.email && <span className="text-rose-500 normal-case font-medium">{errors.email}</span>}
+              </label>
               <input
                 type="email"
                 name="email"
                 placeholder="john@example.com"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full px-4.5 py-3.5 bg-slate-50 border border-slate-200/60 rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 focus:border-[#10b981] focus:bg-white transition-all"
+                className={`w-full px-4.5 py-3.5 bg-slate-50 border ${errors.email ? 'border-rose-300 ring-2 ring-rose-50' : 'border-slate-200/60'} rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 focus:border-[#10b981] focus:bg-white transition-all`}
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Your Message</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between">
+                <span>Your Message</span>
+                {errors.message && <span className="text-rose-500 normal-case font-medium">{errors.message}</span>}
+              </label>
               <textarea
                 name="message"
                 rows={3}
                 placeholder="Describe your query or prescription needs..."
                 value={formData.message}
                 onChange={handleInputChange}
-                className="w-full px-4.5 py-3.5 bg-slate-50 border border-slate-200/60 rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 focus:border-[#10b981] focus:bg-white transition-all resize-none"
+                className={`w-full px-4.5 py-3.5 bg-slate-50 border ${errors.message ? 'border-rose-300 ring-2 ring-rose-50' : 'border-slate-200/60'} rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 focus:border-[#10b981] focus:bg-white transition-all resize-none`}
               ></textarea>
             </div>
 
@@ -230,10 +264,10 @@ export default function ContactUsView({ onWhatsAppClick }: ContactUsViewProps) {
         {/* Column 3: The styled premium vector map */}
         <div className="lg:col-span-4 h-full flex flex-col justify-between">
           <div className="bg-white p-2.5 rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/40 relative overflow-hidden group">
-            
+
             {/* Custom stylized vector map design */}
             <div className="w-full h-[480px] bg-sky-50 rounded-[24px] relative overflow-hidden flex items-center justify-center border border-slate-100/40">
-              
+
               {/* Styled SVG map grids resembling roads & parks of Gulberg, Lahore */}
               <svg className="absolute inset-0 w-full h-full opacity-60" xmlns="http://www.w3.org/2000/svg">
                 <radialGradient id="greenPulse" cx="50%" cy="50%" r="50%">
@@ -244,21 +278,21 @@ export default function ContactUsView({ onWhatsAppClick }: ContactUsViewProps) {
                 <rect x="10%" y="15%" width="85" height="120" rx="4" fill="#d1fae5" />
                 <rect x="70%" y="40%" width="120" height="90" rx="8" fill="#ecfdf5" />
                 <path d="M -20,220 Q 150,180 320,300" stroke="#bae6fd" strokeWidth="12" fill="none" />
-                
+
                 {/* Regular grid networks (streets) */}
                 <line x1="10%" y1="0%" x2="10%" y2="100%" stroke="#ffffff" strokeWidth="5" />
                 <line x1="30%" y1="0%" x2="30%" y2="100%" stroke="#ffffff" strokeWidth="5" />
                 <line x1="50%" y1="0%" x2="50%" y2="100%" stroke="#ffffff" strokeWidth="5" />
                 <line x1="75%" y1="0%" x2="75%" y2="100%" stroke="#ffffff" strokeWidth="5" />
-                
+
                 <line x1="0%" y1="20%" x2="100%" y2="20%" stroke="#ffffff" strokeWidth="5" />
                 <line x1="0%" y1="50%" x2="100%" y2="50%" stroke="#ffffff" strokeWidth="5" />
                 <line x1="0%" y1="78%" x2="100%" y2="78%" stroke="#ffffff" strokeWidth="5" />
-                
+
                 {/* Diagonal Main Boulevard */}
                 <line x1="-10%" y1="10%" x2="110%" y2="90%" stroke="#f1f5f9" strokeWidth="18" />
                 <line x1="-10%" y1="10%" x2="110%" y2="90%" stroke="#e2e8f0" strokeWidth="2" strokeDasharray="6 4" />
-                
+
                 {/* Hotspots pulse indicator */}
                 <circle cx="50%" cy="50%" r="50" fill="url(#greenPulse)" className="animate-ping" style={{ animationDuration: '4s' }} />
                 <circle cx="50%" cy="50%" r="6" fill="#10b981" />
@@ -274,7 +308,7 @@ export default function ContactUsView({ onWhatsAppClick }: ContactUsViewProps) {
                 <p className="text-[10px] sm:text-xs text-slate-500 mt-1">
                   Dharampura Bazar, Lahore, Pakistan
                 </p>
-                <a 
+                <a
                   href="https://maps.google.com/?q=Dharampura+Bazar+Lahore"
                   target="_blank"
                   referrerPolicy="no-referrer"
@@ -298,7 +332,7 @@ export default function ContactUsView({ onWhatsAppClick }: ContactUsViewProps) {
       </div>
 
       {/* Big Bottom WhatsApp Sync Banner */}
-      <div 
+      <div
         className="bg-[#10b981] text-white rounded-[32px] p-8 border border-emerald-500/30 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden shadow-xl shadow-emerald-200/30 animate-pulse"
         style={{ animationDuration: '8s' }}
         id="contact-whatsapp-footer-panel"

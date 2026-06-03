@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CategoryItem } from '../types';
+import { CONTACT_CONFIG } from '../constants';
 
 interface CategoriesViewProps {
   onSelectCategory?: (category: string) => void;
@@ -112,7 +113,7 @@ export default function CategoriesView({ onSelectCategory, medicinesList, onAddT
             <p className="text-xs font-bold text-emerald-800">Support Line</p>
             <p className="text-[11px] text-emerald-600 mt-1">Need item consultation?</p>
             <a
-              href="tel:+923001234567"
+              href={`tel:${CONTACT_CONFIG.phone}`}
               className="mt-3.5 block text-xs font-bold text-white bg-[#10b981] hover:bg-[#059669] py-2.5 px-4 rounded-full transition-all text-center shadow-md shadow-emerald-200 hover:-translate-y-0.5"
             >
               Call Us Now

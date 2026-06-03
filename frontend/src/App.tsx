@@ -6,7 +6,6 @@ import CategoriesView from './components/CategoriesView';
 import ServicesView from './components/ServicesView';
 import AboutUsView from './components/AboutUsView';
 import ContactUsView from './components/ContactUsView';
-import WhatsAppChat from './components/WhatsAppChat';
 import AdminSignIn from './components/AdminSignIn';
 import AdminDashboard from './components/AdminDashboard';
 import { motion, AnimatePresence } from 'motion/react';
@@ -15,10 +14,10 @@ import {
   MapPin, Clock, MessageSquare, Sparkles, ArrowRight,
   Search, Lock, Phone, Upload, ChevronLeft, ChevronRight, Users, Smile, Award, Check, ShoppingCart, UserCheck, ShieldAlert, BadgeCheck, FileText, CheckCircle2, ChevronDown
 } from 'lucide-react';
+import { CONTACT_CONFIG } from './constants';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>('home');
-  const [whatsappOpen, setWhatsappOpen] = useState<boolean>(false);
   const [cart, setCart] = useState<{ id: string; name: string; price: number; quantity: number }[]>([]);
   const [cartOpen, setCartOpen] = useState<boolean>(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(false);
@@ -101,7 +100,7 @@ export default function App() {
 
   // Quick WhatsApp helper
   const handleWhatsAppTrigger = () => {
-    setWhatsappOpen(true);
+    window.open(CONTACT_CONFIG.whatsappUrl(), '_blank');
   };
 
   const handleVisitStore = () => {
@@ -135,7 +134,7 @@ export default function App() {
   const handleWhatsAppCheckout = () => {
     const listString = cart.map(c => `• ${c.quantity}x ${c.name} (PKR ${c.price * c.quantity})`).join('\n');
     const itemsDescription = cart.map(c => `${c.quantity}x ${c.name}`).join(', ');
-    const msg = `Assalamu Alaikum MedOne+ Pharmacy / Dr. Haseeb Ahmed, RPh. I would like to place an order from your website:\n\n${listString}\n\n*Total Amount: PKR ${cartTotal}*\n\nPlease confirm availability and details. Thank you!`;
+    const msg = `Assalamu Alaikum MedOne+ Pharmacy / Naveed Akhtar. I would like to place an order from your website:\n\n${listString}\n\n*Total Amount: PKR ${cartTotal}*\n\nPlease confirm availability and details. Thank you!`;
 
     // Create checkout order on backend
     const orderPayload = {
@@ -190,7 +189,7 @@ export default function App() {
     setCartOpen(false);
 
     const encryptedMsg = encodeURIComponent(msg);
-    window.open(`https://wa.me/923001234567?text=${encryptedMsg}`, '_blank');
+    window.open(CONTACT_CONFIG.whatsappUrl(msg), '_blank');
   };
 
   return (
@@ -426,8 +425,8 @@ export default function App() {
             </div>
             <div>
               <h4 className="text-sm font-bold tracking-wider text-slate-200 mb-4 uppercase">Support Desk</h4>
-              <p className="text-xs text-slate-400">Dharampura Bazar, Lahore, PK</p>
-              <p className="text-xs text-slate-300 font-bold mt-2">+92 300 1234567</p>
+              <p className="text-xs text-slate-400">{CONTACT_CONFIG.address}</p>
+              <p className="text-xs text-slate-300 font-bold mt-2">{CONTACT_CONFIG.phone}</p>
               <p className="text-[10px] text-emerald-400 mt-2 flex items-center">
                 <span className="inline-block w-1.5 h-1.5 bg-emerald-400 rounded-full mr-2 animate-ping" />
                 Specialist On-Call Fulfillments
@@ -446,11 +445,6 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Interactive WhatsApp Live Chat Widget */}
-      <WhatsAppChat
-        isOpen={whatsappOpen}
-        onClose={() => setWhatsappOpen(false)}
-      />
 
     </div>
   );

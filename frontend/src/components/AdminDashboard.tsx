@@ -436,13 +436,13 @@ export default function AdminDashboard({
               <div className="w-9 h-9 rounded-full overflow-hidden bg-emerald-100 border border-emerald-200/50 flex-shrink-0">
                 <img
                   src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150"
-                  alt="Pharmacist Dr. Haseeb Ahmed"
+                  alt="Pharmacist Naveed Akhtar"
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                 />
               </div>
               <div className="hidden md:block">
-                <h4 className="text-[11px] font-black leading-tight text-slate-800">Dr. Haseeb Ahmed</h4>
+                <h4 className="text-[11px] font-black leading-tight text-slate-800">Naveed Akhtar</h4>
                 <p className="text-[9px] text-[#10b981] font-bold">Pharmacist, Owner</p>
               </div>
             </div>

@@ -141,7 +141,7 @@ const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   // Trust proxy for secure headers and correct client IP detection in rate limiting
   app.set('trust proxy', 1);

@@ -134,6 +134,7 @@ import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 import apiRouter from './backend/routes';
 import { initializeDB } from './backend/db';
+import cors from 'cors';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -144,6 +145,9 @@ async function startServer() {
 
   // Trust proxy for secure headers and correct client IP detection in rate limiting
   app.set('trust proxy', 1);
+
+  // Enable CORS to support a separated frontend (e.g. running on localhost:5173 or Vercel)
+  app.use(cors());
 
   // Mount clean body parsers with spacious limit for base64 clinical photos/images
   app.use(express.json({ limit: '50mb' }));
@@ -158,7 +162,7 @@ async function startServer() {
   });
 
   // Vite development vs production asset delivery middleware
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' && process.env.SERVE_FRONTEND !== 'false') {
     console.log('Starting MedOne+ Dev server with Vite middleware...');
     const vite = await createViteServer({
       server: { middlewareMode: true },

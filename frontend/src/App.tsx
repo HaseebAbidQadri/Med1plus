@@ -41,6 +41,17 @@ export default function App() {
 
   // Fetch medicines, checkout orders, and verify admin session state on component mount
   useEffect(() => {
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(settings => {
+        for (const [key, value] of Object.entries(settings)) {
+          if (typeof value === 'string') {
+            localStorage.setItem(key, value);
+          }
+        }
+      })
+      .catch(err => console.error('Error fetching settings/custom images from backend:', err));
+
     fetch('/api/medicines')
       .then(res => res.json())
       .then(data => {

@@ -41,13 +41,58 @@ const dbToken = process.env.TURSO_AUTH_TOKEN || '';
 
 console.log(`[Turso DB] Connecting to libSQL client at address: ${dbUrl}`);
 
-export const db = createClient({
+let activeClient = createClient({
   url: dbUrl,
   authToken: dbToken,
 });
 
+// Create a Proxy around the active client so database calls dynamically delegate to whichever client is active (remote vs local fallback)
+export const db = new Proxy({} as any, {
+  get(target, prop, receiver) {
+    const val = Reflect.get(activeClient, prop, receiver);
+    if (typeof val === 'function') {
+      const boundFn = val.bind(activeClient);
+
+      // If the function is execute, transaction, or batch, wrap it with automatic connection fallback
+      if (prop === 'execute' || prop === 'transaction' || prop === 'batch') {
+        return async function(...args: any[]) {
+          try {
+            return await boundFn(...args);
+          } catch (error: any) {
+            const isConnectionError = error?.message?.includes('fetch failed') || 
+                                      error?.message?.includes('ConnectTimeoutError') ||
+                                      error?.code === 'UND_ERR_CONNECT_TIMEOUT' ||
+                                      error?.message?.includes('Connect Timeout');
+
+            if (isConnectionError && !dbUrl.startsWith('file:') && !usingLocalFallback) {
+              console.warn(`[Turso DB] Query failed due to connection error: ${error.message}. Switching to local SQLite database...`);
+              usingLocalFallback = true;
+              const localDbUrl = `file:${path.join(process.cwd(), 'backend', 'local_turso.db')}`;
+              activeClient = createClient({
+                url: localDbUrl,
+              });
+
+              // Re-initialize the local database schema before retrying the query
+              isInitialized = false;
+              await initializeDB();
+
+              // Now retry the database operation using the new local client
+              const newBoundFn = activeClient[prop as keyof typeof activeClient] as Function;
+              return await newBoundFn.bind(activeClient)(...args);
+            }
+            throw error;
+          }
+        };
+      }
+      return boundFn;
+    }
+    return val;
+  }
+});
+
 // Async lock or trigger to prevent double initialization race conditions
 let isInitialized = false;
+let usingLocalFallback = false;
 
 export async function initializeDB() {
   if (isInitialized) return;
@@ -85,6 +130,14 @@ export async function initializeDB() {
         items TEXT NOT NULL,
         total REAL NOT NULL,
         status TEXT NOT NULL
+      )
+    `);
+
+    // Create settings table schema for persistent configurations (e.g., custom shop images)
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
       )
     `);
 
@@ -137,6 +190,21 @@ export async function initializeDB() {
     console.log('[Turso DB] Schema configuration and state synchronization ready!');
   } catch (error) {
     console.error('[Turso DB] Error during schema and data initialization:', error);
+
+    // If we are attempting a remote connection and have not fallen back yet, trigger fallback to local SQLite
+    if (!dbUrl.startsWith('file:') && !usingLocalFallback) {
+      console.warn('[Turso DB] Remote database connection failed. Falling back to local SQLite database...');
+      usingLocalFallback = true;
+      const localDbUrl = `file:${path.join(process.cwd(), 'backend', 'local_turso.db')}`;
+      activeClient = createClient({
+        url: localDbUrl,
+      });
+      // Reset isInitialized and retry initialization with the local client
+      isInitialized = false;
+      await initializeDB();
+    } else {
+      console.error('[Turso DB] Database initialization failed completely.');
+    }
   }
 }
 
@@ -284,6 +352,33 @@ export async function deleteAdminSession(token: string): Promise<void> {
     });
   } catch (err) {
     console.error('[Delete Session Error]:', err);
+  }
+}
+
+// Persistent Settings Operations
+export async function getSetting(key: string): Promise<string | null> {
+  await initializeDB();
+  try {
+    const res = await db.execute({
+      sql: 'SELECT value FROM settings WHERE key = ?',
+      args: [key]
+    });
+    return res.rows[0]?.value ? String(res.rows[0].value) : null;
+  } catch (err) {
+    console.error('[Get Setting Error]:', err);
+    return null;
+  }
+}
+
+export async function saveSetting(key: string, value: string): Promise<void> {
+  await initializeDB();
+  try {
+    await db.execute({
+      sql: 'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
+      args: [key, value]
+    });
+  } catch (err) {
+    console.error('[Save Setting Error]:', err);
   }
 }
 

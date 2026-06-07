@@ -17,6 +17,7 @@ export async function uploadImage(fileBuffer: Buffer): Promise<string> {
         const uploadStream = cloudinary.uploader.upload_stream(
             {
                 folder: 'medone_pharmacy',
+                resource_type: 'auto',
             },
             (error, result) => {
                 if (error) return reject(error);

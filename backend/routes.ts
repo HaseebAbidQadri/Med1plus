@@ -11,16 +11,50 @@ import {
   deleteAdminSession,
   bulkSaveMedicines,
   Medicine,
-  Order
+  Order,
+  getSetting,
+  saveSetting,
+  db // We might need db for retrieving all settings in route
 } from './db';
 import multer from 'multer';
 import { uploadImage } from './cloudinary';
+import rateLimit from 'express-rate-limit';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
+// 1. General API Rate Limiter: 100 requests per 15 minutes per IP
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests from this IP, please try again after 15 minutes.' }
+});
+
+// Apply the general API limiter to all routes
+router.use(apiLimiter);
+
+// 2. Authentication Login Limiter (Stricter): 5 attempts per 15 minutes per IP
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 login requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts, please try again after 15 minutes.' }
+});
+
+// 3. Image Upload Rate Limiter (Stricter): 10 uploads per 15 minutes per IP
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 uploads per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many uploads, please try again after 15 minutes.' }
+});
+
 // 0. Admin Authentication/Authorization Endpoints
-router.post('/auth/login', async (req: Request, res: Response) => {
+router.post('/auth/login', loginLimiter, async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -269,7 +303,7 @@ router.post('/orders/:id/status', async (req: Request, res: Response) => {
 });
 
 // 3. Image uploading endpoint using Cloudinary
-router.post('/upload-image', upload.single('image'), async (req: any, res: Response) => {
+router.post('/upload-image', uploadLimiter, upload.single('image'), async (req: any, res: Response) => {
   try {
     if (!req.file) {
       // Fallback for base64 if needed, though we prefer file
@@ -289,6 +323,36 @@ router.post('/upload-image', upload.single('image'), async (req: any, res: Respo
   } catch (err: any) {
     console.error('Error in POST /upload-image:', err);
     res.status(500).json({ error: 'Failed to upload image to Cloudinary.' });
+  }
+});
+
+// Settings Endpoints
+router.get('/settings', async (req: Request, res: Response) => {
+  try {
+    const resDb = await db.execute('SELECT * FROM settings');
+    const settings: Record<string, string> = {};
+    for (const row of resDb.rows) {
+      settings[String(row.key)] = String(row.value);
+    }
+    res.json(settings);
+  } catch (err: any) {
+    console.error('Error in GET /settings:', err);
+    res.status(550).json({ error: 'Failed to retrieve settings.' });
+  }
+});
+
+router.post('/settings', async (req: Request, res: Response) => {
+  try {
+    const { key, value } = req.body;
+    if (!key) {
+      res.status(400).json({ error: 'Key is required.' });
+      return;
+    }
+    await saveSetting(key, value);
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error('Error in POST /settings:', err);
+    res.status(500).json({ error: 'Failed to save setting.' });
   }
 });
 

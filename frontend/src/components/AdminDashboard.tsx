@@ -1281,14 +1281,33 @@ export default function AdminDashboard({
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) {
-                                const reader = new FileReader();
-                                reader.onload = (event) => {
-                                  if (event.target?.result) {
-                                    localStorage.setItem(slot.key, event.target.result as string);
-                                    window.location.reload();
-                                  }
-                                };
-                                reader.readAsDataURL(file);
+                                const formData = new FormData();
+                                formData.append('image', file);
+
+                                fetch('/api/upload-image', {
+                                  method: 'POST',
+                                  body: formData
+                                })
+                                  .then(res => res.json())
+                                  .then(data => {
+                                    if (data.url) {
+                                      fetch('/api/settings', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ key: slot.key, value: data.url })
+                                      })
+                                        .then(() => {
+                                          localStorage.setItem(slot.key, data.url);
+                                          window.location.reload();
+                                        });
+                                    } else {
+                                      alert('Failed to upload image. Please try again.');
+                                    }
+                                  })
+                                  .catch(err => {
+                                    console.error('Image upload failed:', err);
+                                    alert('Failed to upload image to server.');
+                                  });
                               }
                             }}
                           />
@@ -1296,8 +1315,15 @@ export default function AdminDashboard({
                         {customImage && (
                           <button
                             onClick={() => {
-                              localStorage.removeItem(slot.key);
-                              window.location.reload();
+                              fetch('/api/settings', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ key: slot.key, value: '' })
+                              })
+                                .then(() => {
+                                  localStorage.removeItem(slot.key);
+                                  window.location.reload();
+                                });
                             }}
                             className="w-full py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-500 text-[10px] font-black rounded-lg transition-colors border border-rose-100"
                           >

@@ -39,6 +39,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
   const [selectedSearchCat, setSelectedSearchCat] = useState('All Categories');
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [startIndex, setStartIndex] = useState(0);
   const [tempSearchQuery, setTempSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -166,16 +167,37 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
   };
 
   const handleUploadSubmit = () => {
-    if (uploadFile) {
-      setIsSubmitSuccessful(true);
-      setTimeout(() => {
-        setIsSubmitSuccessful(false);
-        setUploadFile(null);
+    if (!uploadFile) return;
 
-        const msg = encodeURIComponent("Assalamu Alaikum MedOne+ Pharmacy. I have attached my prescription for review. Please check and guide me on the medicines.");
-        window.open(CONTACT_CONFIG.whatsappUrl("Assalamu Alaikum MedOne+ Pharmacy. I have attached my prescription for review. Please check and guide me on the medicines."), '_blank');
-      }, 1000);
-    }
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('image', uploadFile);
+
+    fetch('/api/upload-image', {
+      method: 'POST',
+      body: formData
+    })
+      .then(res => res.json())
+      .then(data => {
+        setIsUploading(false);
+        if (data.url) {
+          setIsSubmitSuccessful(true);
+          setTimeout(() => {
+            setIsSubmitSuccessful(false);
+            setUploadFile(null);
+
+            const msg = `Assalamu Alaikum MedOne+ Pharmacy. I have attached my prescription for review:\n\n${data.url}\n\nPlease check and guide me on the medicines.`;
+            window.open(CONTACT_CONFIG.whatsappUrl(msg), '_blank');
+          }, 800);
+        } else {
+          alert('Failed to upload prescription. Please try again.');
+        }
+      })
+      .catch(err => {
+        console.error('Prescription upload failed:', err);
+        setIsUploading(false);
+        alert('Failed to connect to the server for upload.');
+      });
   };
 
   return (
@@ -275,14 +297,14 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
                 transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                 className="absolute -top-6 -left-6 z-20 text-3xl select-none"
               >
-                
+
               </motion.div>
               <motion.div
                 animate={{ y: [0, 8, 0], rotate: [0, -6, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                 className="absolute -bottom-4 right-8 z-20 text-2xl select-none"
               >
-            
+
               </motion.div>
 
               {/* Real Branch visual showcase frame */}
@@ -759,9 +781,10 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
                     e.stopPropagation();
                     handleUploadSubmit();
                   }}
-                  className="px-5 py-2.5 bg-[#10b981] hover:bg-[#059669] text-white rounded-xl text-xs font-bold shadow-md transition-all mt-4 w-full"
+                  disabled={isUploading}
+                  className="px-5 py-2.5 bg-[#10b981] hover:bg-[#059669] text-white rounded-xl text-xs font-bold shadow-md transition-all mt-4 w-full disabled:opacity-50 cursor-pointer"
                 >
-                  Submit to Certified RPh
+                  {isUploading ? 'Uploading Prescription...' : 'Let\'s talk on whatsapp'}
                 </button>
               )}
             </div>

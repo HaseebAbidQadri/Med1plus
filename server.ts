@@ -142,6 +142,9 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  // Trust proxy for secure headers and correct client IP detection in rate limiting
+  app.set('trust proxy', 1);
+
   // Mount clean body parsers with spacious limit for base64 clinical photos/images
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));

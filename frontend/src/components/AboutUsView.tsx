@@ -11,20 +11,17 @@ export default function AboutUsView({ onVisitStoreClick }: AboutUsViewProps) {
   const [shelvesImg, setShelvesImg] = useState<string>("https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&q=80&w=400");
   const [vitaminsImg, setVitaminsImg] = useState<string>("https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=400");
   const [pharmacistImg, setPharmacistImg] = useState<string>("https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400");
-  const [waitingImg, setWaitingImg] = useState<string>("https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=400");
 
   useEffect(() => {
     const customStorefront = localStorage.getItem('medone_custom_image_storefront');
     const customShelves = localStorage.getItem('medone_custom_image_shelves');
     const customVitamins = localStorage.getItem('medone_custom_image_vitamins');
     const customPharmacist = localStorage.getItem('medone_custom_image_pharmacist');
-    const customWaiting = localStorage.getItem('medone_custom_image_waiting');
 
     if (customStorefront) setStorefrontImg(customStorefront);
     if (customShelves) setShelvesImg(customShelves);
     if (customVitamins) setVitaminsImg(customVitamins);
     if (customPharmacist) setPharmacistImg(customPharmacist);
-    if (customWaiting) setWaitingImg(customWaiting);
   }, []);
 
   const stats = [
@@ -141,8 +138,8 @@ export default function AboutUsView({ onVisitStoreClick }: AboutUsViewProps) {
               </div>
             </div>
 
-            {/* 3. Product Display Shelf (Bottom Left, 3 cols) */}
-            <div className="col-span-3 h-[180px] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200/40 border border-slate-100 group hidden sm:block relative">
+            {/* 3. Product Display Shelf (Bottom Left, 6 cols) */}
+            <div className="col-span-6 h-[180px] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200/40 border border-slate-100 group hidden sm:block relative">
               <img
                 src={vitaminsImg}
                 alt="Dermatological skincare bottles"
@@ -154,8 +151,8 @@ export default function AboutUsView({ onVisitStoreClick }: AboutUsViewProps) {
               </div>
             </div>
 
-            {/* 4. Smiling Pharmacist professional man (Bottom Middle, 5 cols or 6 cols) */}
-            <div className="col-span-6 sm:col-span-5 h-[180px] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200/40 border border-slate-100 group relative">
+            {/* 4. Smiling Pharmacist professional man (Bottom Right, 6 cols on sm, 12 cols on mobile) */}
+            <div className="col-span-12 sm:col-span-6 h-[180px] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200/40 border border-slate-100 group relative">
               <img
                 src={pharmacistImg}
                 alt="Lead Pharmacist at MedOne+"
@@ -165,19 +162,6 @@ export default function AboutUsView({ onVisitStoreClick }: AboutUsViewProps) {
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/60 to-transparent p-4 text-left">
                 <span className="text-[10px] uppercase font-bold text-emerald-400">RPh Specialist</span>
                 <span className="text-xs font-bold text-white block">Naveed Akhtar</span>
-              </div>
-            </div>
-
-            {/* 5. Cozy Clinic Waiting Lounge (Bottom Right, 6 cols or 4 cols) */}
-            <div className="col-span-6 sm:col-span-4 h-[180px] rounded-[32px] overflow-hidden shadow-xl shadow-slate-200/40 border border-slate-100 group relative">
-              <img
-                src={waitingImg}
-                alt="Cozy clinical interior counter"
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/60 to-transparent p-4 text-left">
-                <span className="text-xs font-bold text-white block">Comfort Waiting Room</span>
               </div>
             </div>
 

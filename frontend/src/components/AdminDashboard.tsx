@@ -11,6 +11,7 @@ import {
   Upload
 } from 'lucide-react';
 import { Logo } from './Logo';
+import { apiUrl } from '../api';
 
 // Import default mockup images
 import defaultHeroImg from '../assets/images/pharmacy_hero_1779732503274.png';
@@ -179,7 +180,7 @@ export default function AdminDashboard({
   // Handlers for managing Inventory list
   const handleDeleteMedicine = async (id: string) => {
     try {
-      const res = await fetch(`/api/medicines/${id}`, { method: 'DELETE' });
+      const res = await fetch(apiUrl(`/api/medicines/${id}`), { method: 'DELETE' });
       if (res.ok) {
         setMedicinesList(prev => prev.filter(item => item.id !== id));
       } else {
@@ -207,7 +208,7 @@ export default function AdminDashboard({
     // If we have a base64 image, upload it to Cloudinary first
     if (newMedImage && newMedImage.startsWith('data:')) {
       try {
-        const uploadRes = await fetch('/api/upload-image', {
+        const uploadRes = await fetch(apiUrl('/api/upload-image'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ imageData: newMedImage })
@@ -231,7 +232,7 @@ export default function AdminDashboard({
     };
 
     try {
-      const res = await fetch('/api/medicines', {
+      const res = await fetch(apiUrl('/api/medicines'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -324,7 +325,7 @@ export default function AdminDashboard({
       }
 
       try {
-        const res = await fetch('/api/medicines/bulk', {
+        const res = await fetch(apiUrl('/api/medicines/bulk'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ medicines })
@@ -333,7 +334,7 @@ export default function AdminDashboard({
         if (res.ok) {
           alert(`Successfully imported ${medicines.length} medicines.`);
           // Refresh list
-          const listRes = await fetch('/api/medicines');
+          const listRes = await fetch(apiUrl('/api/medicines'));
           if (listRes.ok) {
             const newList = await listRes.json();
             setMedicinesList(newList);
@@ -1284,14 +1285,14 @@ export default function AdminDashboard({
                                 const formData = new FormData();
                                 formData.append('image', file);
 
-                                fetch('/api/upload-image', {
+                                fetch(apiUrl('/api/upload-image'), {
                                   method: 'POST',
                                   body: formData
                                 })
                                   .then(res => res.json())
                                   .then(data => {
                                     if (data.url) {
-                                      fetch('/api/settings', {
+                                      fetch(apiUrl('/api/settings'), {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({ key: slot.key, value: data.url })
@@ -1315,7 +1316,7 @@ export default function AdminDashboard({
                         {customImage && (
                           <button
                             onClick={() => {
-                              fetch('/api/settings', {
+                              fetch(apiUrl('/api/settings'), {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ key: slot.key, value: '' })

@@ -15,6 +15,7 @@ import {
   Search, Lock, Phone, Upload, ChevronLeft, ChevronRight, Users, Smile, Award, Check, ShoppingCart, UserCheck, ShieldAlert, BadgeCheck, FileText, CheckCircle2, ChevronDown
 } from 'lucide-react';
 import { CONTACT_CONFIG } from './constants';
+import { apiUrl } from './api';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>('home');
@@ -22,26 +23,15 @@ export default function App() {
   const [cartOpen, setCartOpen] = useState<boolean>(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(false);
 
-  // List of clinical medicines which is passed down and shared globally!
-  const [medicines, setMedicines] = useState([
-    { id: 'panadol', name: 'Panadol 500mg', price: 120, imgGradient: 'from-rose-50 to-rose-100 text-rose-500', category: 'All Medicines', stock: 150, status: 'In Stock' as const, imgUrl: '' },
-    { id: 'brufen', name: 'Brufen 400mg', price: 150, imgGradient: 'from-indigo-50 to-indigo-100 text-indigo-500', category: 'All Medicines', stock: 85, status: 'Low Stock' as const, imgUrl: '' },
-    { id: 'augmentin', name: 'Augmentin 625mg', price: 280, imgGradient: 'from-emerald-50 to-emerald-100 text-[#10b981]', category: 'All Medicines', stock: 60, status: 'Low Stock' as const, imgUrl: '' },
-    { id: 'caltrate', name: 'Caltrate Plus', price: 950, imgGradient: 'from-amber-50 to-amber-100 text-amber-500', category: 'Vitamins & Supplements', stock: 110, status: 'In Stock' as const, imgUrl: '' },
-    { id: 'supradyn', name: 'Supradyn', price: 850, imgGradient: 'from-sky-50 to-sky-100 text-sky-500', category: 'Vitamins & Supplements', stock: 95, status: 'In Stock' as const, imgUrl: '' },
-    { id: 'surbex', name: 'Surbex Z (35 Tablets)', price: 850, imgGradient: 'from-orange-50 to-orange-100 text-orange-500', category: 'Vitamins & Supplements', stock: 40, status: 'Low Stock' as const, imgUrl: '' }
-  ]);
+  // Medicines loaded from database on mount via useEffect below
+  const [medicines, setMedicines] = useState<{ id: string; name: string; price: number; imgGradient: string; category: string; stock: number; status: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Expired Soon'; imgUrl: string }[]>([]);
 
-  // List of simulated incoming customer checkout orders
-  const [orders, setOrders] = useState([
-    { id: 'ORD-9912', customerName: 'Zainab Bibi', createdAt: '10 mins ago', items: '2x Panadol 500mg, 1x Caltrate Plus', total: 1190, status: 'Pending' as const },
-    { id: 'ORD-8822', customerName: 'Muhammad Salman', createdAt: '1 hour ago', items: '1x Augmentin 625mg', total: 280, status: 'Confirmed' as const },
-    { id: 'ORD-7561', customerName: 'Ayesha Khan', createdAt: '4 hours ago', items: '3x Brufen 400mg', total: 450, status: 'Delivered' as const }
-  ]);
+  // Orders loaded from database on mount via useEffect below
+  const [orders, setOrders] = useState<{ id: string; customerName: string; createdAt: string; items: string; total: number; status: 'Pending' | 'Confirmed' | 'Delivered' | 'Cancelled' }[]>([]);
 
   // Fetch medicines, checkout orders, and verify admin session state on component mount
   useEffect(() => {
-    fetch('/api/settings')
+    fetch(apiUrl('/api/settings'))
       .then(res => res.json())
       .then(settings => {
         for (const [key, value] of Object.entries(settings)) {
@@ -52,7 +42,7 @@ export default function App() {
       })
       .catch(err => console.error('Error fetching settings/custom images from backend:', err));
 
-    fetch('/api/medicines')
+    fetch(apiUrl('/api/medicines'))
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
@@ -62,7 +52,7 @@ export default function App() {
       })
       .catch(err => console.error('Error fetching clinical medicines list from backend:', err));
 
-    fetch('/api/orders')
+    fetch(apiUrl('/api/orders'))
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
@@ -73,7 +63,7 @@ export default function App() {
 
     const token = localStorage.getItem('medone_admin_token');
     if (token) {
-      fetch('/api/auth/verify', {
+      fetch(apiUrl('/api/auth/verify'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -98,7 +88,7 @@ export default function App() {
   const handleLogout = () => {
     const token = localStorage.getItem('medone_admin_token');
     if (token) {
-      fetch('/api/auth/logout', {
+      fetch(apiUrl('/api/auth/logout'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -156,7 +146,7 @@ export default function App() {
       itemsList: cart.map(c => ({ id: c.id, quantity: c.quantity }))
     };
 
-    fetch('/api/orders', {
+    fetch(apiUrl('/api/orders'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

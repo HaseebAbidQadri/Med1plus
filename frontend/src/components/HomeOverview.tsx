@@ -5,6 +5,7 @@ import {
   Search, ChevronDown, ChevronLeft, ChevronRight,
   Users, Clock, MapPin, Upload, Truck, MessageSquare, Check, Smile, Phone, ArrowRight, Lock, Activity, UserCheck
 } from 'lucide-react';
+import { apiUrl } from '../api';
 
 // Live Branded Pharmacy Mockups from User Files
 import pharmacyHeroImg from '../assets/images/pharmacy_hero_1779732503274.png';
@@ -173,7 +174,7 @@ export default function HomeOverview({ onBrowseCatalog, onExploreServices, onVis
     const formData = new FormData();
     formData.append('image', uploadFile);
 
-    fetch('/api/upload-image', {
+    fetch(apiUrl('/api/upload-image'), {
       method: 'POST',
       body: formData
     })

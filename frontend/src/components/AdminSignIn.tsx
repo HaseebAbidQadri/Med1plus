@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Lock, Mail, Eye, EyeOff, ShieldCheck, ArrowRight, Pill, Sparkles, AlertCircle } from 'lucide-react';
 import { Logo } from './Logo';
+import { apiUrl } from '../api';
 
 interface AdminSignInProps {
   onLoginSuccess: () => void;
@@ -9,7 +10,7 @@ interface AdminSignInProps {
 
 export default function AdminSignIn({ onLoginSuccess }: AdminSignInProps) {
   const [email, setEmail] = useState('admin@medonepharmacy.com');
-  const [password, setPassword] = useState('admin123');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -20,7 +21,7 @@ export default function AdminSignIn({ onLoginSuccess }: AdminSignInProps) {
     setIsSubmitting(true);
     setError('');
 
-    fetch('/api/auth/login', {
+    fetch(apiUrl('/api/auth/login'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

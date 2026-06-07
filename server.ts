@@ -162,7 +162,10 @@ async function startServer() {
   });
 
   // Vite development vs production asset delivery middleware
-  if (process.env.NODE_ENV !== 'production' && process.env.SERVE_FRONTEND !== 'false') {
+  if (process.env.SERVE_FRONTEND === 'false') {
+    // Pure API mode — frontend is served separately (e.g. Vite dev server or Vercel)
+    console.log('Starting MedOne+ in pure API mode (frontend served separately)...');
+  } else if (process.env.NODE_ENV !== 'production') {
     console.log('Starting MedOne+ Dev server with Vite middleware...');
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -189,6 +192,7 @@ async function startServer() {
       }
     });
   } else {
+    // Production mode — serve built frontend from frontend/dist
     console.log('Starting MedOne+ Production build static serving...');
     const distPath = path.join(process.cwd(), 'frontend', 'dist');
     app.use(express.static(distPath));
